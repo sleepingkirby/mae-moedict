@@ -4,8 +4,8 @@ https://github.com/sleepingkirby/mae-moedict
 *NOTE: Current compile is for devuan/debian/ubuntu only. Will recompile later for nokia n900*
 
 
-my first QT application. Made for nokia n900. Works with qt4.8 only.
-Data based off of moedict pack files:
+my first QT application. Made for nokia n900. Also works in linux (tested with Devuan/Debian) Works with qt4.8 only. Requires SQLite and QT4.
+Definitions based off of moedict pack files:
 https://github.com/racklin/moedict-desktop/
 
 Did this in a rush so there aren't a lot of documentation comments in code.  Because I wanted it done as soon as possible. But, also, QT is horrible to work with. Bad/wrong documentation. Some functions don't work as they should. Inconsistent function parameters for the same class. Can't do much without rewriting your own classes. Needs classes for virtually everything. Some functions just don't plain work (set scroll bars, set dimensions via qss), the css-like syntax is used but only missing other css syntax as well as changed the format of the declarations for no good reason. qss can't be applied to named elements (or at least, no way I could find in the documentation).  And other reasons I don't remember at the moment. 
@@ -49,6 +49,9 @@ TextBrowser objects replaced with WebView objects. Allows for full html and CSS 
 
 UPDATE 2016/07/25
 Added Free, English and About (to make sure the link to the source is available in the program) and Copy functionality (because that needs to be done manually, apparently.).
+
+UPDATE 2017/09/04
+Diverted some styles, previously hardcoded, into the style sheets in assets. This is to allow for easier/customization of font sizes, colors, etc. Useful when compiling for different OS's with different themes. 
 
 Known Issues: 
 - Due to vfat and the 36000+ ogg files, you can't load it all the files into the same directory. If audio is a must, one of the following must happen:
