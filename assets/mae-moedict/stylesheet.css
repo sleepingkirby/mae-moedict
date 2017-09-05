@@ -1,0 +1,31 @@
+
+#char{
+vertical-align: middle;
+}
+
+a{
+font-size: 14pt;
+}
+
+a:hover{
+background-color: yellow;
+}
+
+a:visied{
+color: red;
+}
+
+.free{
+margin-right: 15px;
+}
+
+.eng{
+display: block;
+margin-right: 10px;
+}
+
+#about{
+background-color: black;
+color: white;
+padding-top: 20px;
+}

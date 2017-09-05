@@ -1,0 +1,6 @@
+TEMPLATE = lib
+CONFIG += staticlib
+
+# Input
+HEADERS += sqlitedb.h
+SOURCES += sqlitedb.cpp

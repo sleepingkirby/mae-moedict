@@ -1,0 +1,34 @@
+QWidget{
+color: white;
+padding: 0px;
+}
+QTextEdit{
+background-color: white;
+color: black;
+margin: 0px;
+font-size: 12pt;
+}
+QGridLayout{
+margin: 0px;
+padding: 0px;
+}
+QTabWidget{
+width: 800px;
+height: 480px;
+margin: 0px;
+padding: 0px;
+}
+QTabBar::tab{
+background-color: black;
+height: 30px;
+width: 160px;
+}
+QComboBox{
+color: black;
+font-size: 14pt;
+text-align: center;
+}
+QPushButton{
+color: black;
+width: 80px;
+}
