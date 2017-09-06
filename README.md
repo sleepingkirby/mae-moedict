@@ -59,9 +59,6 @@ Known Issues:
   2) use a file system like ext2 (just not fat) to hold the files. 
 - Audio in definitions page won't play. Probably due to QT limitations on the nokia n900
 - Added a work around to include the path + mplayer to the definitions. Can be copied and pasted into the terminal.
-- Database needs to be reimported to fix bopomo text. Will do that later and reupload. 
 
-
-I now consider this complete. It has all the features I could have thought of and wanted. If there are any requests for features, feel free to contact me or fork this project. 
 
 # mae-moedict
