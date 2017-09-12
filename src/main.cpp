@@ -1119,19 +1119,27 @@ this->setLayout(zyg);
 QString confpath(){
 QString confDirNm="/.mae-moedict";
 QString assets="/assets/";
-QString homepath=QDir::homePath() + confDirNm;
+QString n900MyDocs="/MyDocs/";
+QString n900ext="/media/mmc1" + confDirNm;
+QString cwd=QDir::currentPath();
+QString homepath=QDir::homePath() + confDirNm + assets;
 QDir dirobj(homepath);
 	if(!pathexists(homepath)){
-	qWarning() << "homepath: "+homepath+" doesn't exist. Creating...";
-		if(dirobj.mkdir(homepath)){
-		qWarning() << "Unable to make directory. Please check permissions or create manually.";
-		}
+	qWarning() << "homepath: "+homepath+" doesn't exist. Continuing to search for asset folder.";
 	}
 
-homepath=homepath+assets;
+homepath=QDir::homePath() + n900MyDocs + confDirNm + assets;
 	if(!pathexists(homepath)){
-	qWarning() << "Unable to find assets folder, please make sure assets folder, WITH ASSETS are placed in "+homepath+". Exitting...";
-	exit(EXIT_FAILURE);
+	qWarning() << "homepath: "+homepath+" doesn't exist. Continuing to search for asset folder.";
+	}
+homepath=n900ext + assets;
+	if(!pathexists(homepath)){
+	qWarning() << "external: "+homepath+" doesn't exist. Continuing to search for asset folder.";
+	}
+homepath=cwd + assets;
+	if(!pathexists(homepath)){
+	qWarning() << "current working directory: "+homepath+" doesn't exist. Exhausted all alternatives. Exitting...";
+	exit(0);
 	}
 
 return homepath;
@@ -1152,6 +1160,7 @@ app.setApplicationName("mae-moedict");
 assetpath=confpath();
 qWarning() << "using assetpath "+assetpath;
 //assetpath="/scratchbox/users/sleepingkirby/home/sleepingkirby/dev/mae-moedict/assets/";
+
 
 
 // set font for chinese

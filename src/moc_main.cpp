@@ -1,7 +1,8 @@
 /****************************************************************************
 ** Meta object code from reading C++ file 'main.h'
 **
-** Created by: The Qt Meta Object Compiler version 63 (Qt 4.8.6)
+** Created: Mon Sep 11 22:10:28 2017
+**      by: The Qt Meta Object Compiler version 62 (Qt 4.7.0)
 **
 ** WARNING! All changes made in this file will be lost!
 *****************************************************************************/
@@ -9,8 +10,8 @@
 #include "main.h"
 #if !defined(Q_MOC_OUTPUT_REVISION)
 #error "The header file 'main.h' doesn't include <QObject>."
-#elif Q_MOC_OUTPUT_REVISION != 63
-#error "This file was generated using the moc from 4.8.6. It"
+#elif Q_MOC_OUTPUT_REVISION != 62
+#error "This file was generated using the moc from 4.7.0. It"
 #error "cannot be used with the include files from this version of Qt."
 #error "(The moc has changed too much.)"
 #endif
@@ -19,7 +20,7 @@ QT_BEGIN_MOC_NAMESPACE
 static const uint qt_meta_data_loadLbl[] = {
 
  // content:
-       6,       // revision
+       5,       // revision
        0,       // classname
        0,    0, // classinfo
        4,   14, // methods
@@ -43,28 +44,9 @@ static const char qt_meta_stringdata_loadLbl[] = {
     "setClear()\0setClear(QUrl)\0"
 };
 
-void loadLbl::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
-{
-    if (_c == QMetaObject::InvokeMetaMethod) {
-        Q_ASSERT(staticMetaObject.cast(_o));
-        loadLbl *_t = static_cast<loadLbl *>(_o);
-        switch (_id) {
-        case 0: _t->setLoad(); break;
-        case 1: _t->setLoad((*reinterpret_cast< QUrl(*)>(_a[1]))); break;
-        case 2: _t->setClear(); break;
-        case 3: _t->setClear((*reinterpret_cast< QUrl(*)>(_a[1]))); break;
-        default: ;
-        }
-    }
-}
-
-const QMetaObjectExtraData loadLbl::staticMetaObjectExtraData = {
-    0,  qt_static_metacall 
-};
-
 const QMetaObject loadLbl::staticMetaObject = {
     { &QLabel::staticMetaObject, qt_meta_stringdata_loadLbl,
-      qt_meta_data_loadLbl, &staticMetaObjectExtraData }
+      qt_meta_data_loadLbl, 0 }
 };
 
 #ifdef Q_NO_DATA_RELOCATION
@@ -90,8 +72,13 @@ int loadLbl::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     if (_id < 0)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {
-        if (_id < 4)
-            qt_static_metacall(this, _c, _id, _a);
+        switch (_id) {
+        case 0: setLoad(); break;
+        case 1: setLoad((*reinterpret_cast< QUrl(*)>(_a[1]))); break;
+        case 2: setClear(); break;
+        case 3: setClear((*reinterpret_cast< QUrl(*)>(_a[1]))); break;
+        default: ;
+        }
         _id -= 4;
     }
     return _id;
@@ -99,7 +86,7 @@ int loadLbl::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
 static const uint qt_meta_data_defpage[] = {
 
  // content:
-       6,       // revision
+       5,       // revision
        0,       // classname
        0,    0, // classinfo
        4,   14, // methods
@@ -126,28 +113,9 @@ static const char qt_meta_stringdata_defpage[] = {
     "keyPressEvent(QKeyEvent*)\0"
 };
 
-void defpage::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
-{
-    if (_c == QMetaObject::InvokeMetaMethod) {
-        Q_ASSERT(staticMetaObject.cast(_o));
-        defpage *_t = static_cast<defpage *>(_o);
-        switch (_id) {
-        case 0: _t->loadDefSgn((*reinterpret_cast< int(*)>(_a[1]))); break;
-        case 1: _t->sgnRun((*reinterpret_cast< QUrl(*)>(_a[1]))); break;
-        case 2: _t->sgnLoadDef((*reinterpret_cast< int(*)>(_a[1]))); break;
-        case 3: _t->keyPressEvent((*reinterpret_cast< QKeyEvent*(*)>(_a[1]))); break;
-        default: ;
-        }
-    }
-}
-
-const QMetaObjectExtraData defpage::staticMetaObjectExtraData = {
-    0,  qt_static_metacall 
-};
-
 const QMetaObject defpage::staticMetaObject = {
     { &QDialog::staticMetaObject, qt_meta_stringdata_defpage,
-      qt_meta_data_defpage, &staticMetaObjectExtraData }
+      qt_meta_data_defpage, 0 }
 };
 
 #ifdef Q_NO_DATA_RELOCATION
@@ -173,8 +141,13 @@ int defpage::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     if (_id < 0)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {
-        if (_id < 4)
-            qt_static_metacall(this, _c, _id, _a);
+        switch (_id) {
+        case 0: loadDefSgn((*reinterpret_cast< int(*)>(_a[1]))); break;
+        case 1: sgnRun((*reinterpret_cast< QUrl(*)>(_a[1]))); break;
+        case 2: sgnLoadDef((*reinterpret_cast< int(*)>(_a[1]))); break;
+        case 3: keyPressEvent((*reinterpret_cast< QKeyEvent*(*)>(_a[1]))); break;
+        default: ;
+        }
         _id -= 4;
     }
     return _id;
@@ -189,7 +162,7 @@ void defpage::loadDefSgn(int _t1)
 static const uint qt_meta_data_clickTB[] = {
 
  // content:
-       6,       // revision
+       5,       // revision
        0,       // classname
        0,    0, // classinfo
        5,   14, // methods
@@ -216,30 +189,9 @@ static const char qt_meta_stringdata_clickTB[] = {
     "sgnFreeRun()\0sgnEngRun()\0"
 };
 
-void clickTB::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
-{
-    if (_c == QMetaObject::InvokeMetaMethod) {
-        Q_ASSERT(staticMetaObject.cast(_o));
-        clickTB *_t = static_cast<clickTB *>(_o);
-        switch (_id) {
-        case 0: _t->clicked(); break;
-        case 1: _t->sgnRun(); break;
-        case 2: _t->sgnRadRun(); break;
-        case 3: _t->sgnFreeRun(); break;
-        case 4: _t->sgnEngRun(); break;
-        default: ;
-        }
-    }
-    Q_UNUSED(_a);
-}
-
-const QMetaObjectExtraData clickTB::staticMetaObjectExtraData = {
-    0,  qt_static_metacall 
-};
-
 const QMetaObject clickTB::staticMetaObject = {
     { &QWebView::staticMetaObject, qt_meta_stringdata_clickTB,
-      qt_meta_data_clickTB, &staticMetaObjectExtraData }
+      qt_meta_data_clickTB, 0 }
 };
 
 #ifdef Q_NO_DATA_RELOCATION
@@ -265,8 +217,14 @@ int clickTB::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     if (_id < 0)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {
-        if (_id < 5)
-            qt_static_metacall(this, _c, _id, _a);
+        switch (_id) {
+        case 0: clicked(); break;
+        case 1: sgnRun(); break;
+        case 2: sgnRadRun(); break;
+        case 3: sgnFreeRun(); break;
+        case 4: sgnEngRun(); break;
+        default: ;
+        }
         _id -= 5;
     }
     return _id;
@@ -280,7 +238,7 @@ void clickTB::clicked()
 static const uint qt_meta_data_clickComboBox[] = {
 
  // content:
-       6,       // revision
+       5,       // revision
        0,       // classname
        0,    0, // classinfo
        1,   14, // methods
@@ -300,25 +258,9 @@ static const char qt_meta_stringdata_clickComboBox[] = {
     "clickComboBox\0\0str\0sgnHideShow(QString)\0"
 };
 
-void clickComboBox::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
-{
-    if (_c == QMetaObject::InvokeMetaMethod) {
-        Q_ASSERT(staticMetaObject.cast(_o));
-        clickComboBox *_t = static_cast<clickComboBox *>(_o);
-        switch (_id) {
-        case 0: _t->sgnHideShow((*reinterpret_cast< QString(*)>(_a[1]))); break;
-        default: ;
-        }
-    }
-}
-
-const QMetaObjectExtraData clickComboBox::staticMetaObjectExtraData = {
-    0,  qt_static_metacall 
-};
-
 const QMetaObject clickComboBox::staticMetaObject = {
     { &QComboBox::staticMetaObject, qt_meta_stringdata_clickComboBox,
-      qt_meta_data_clickComboBox, &staticMetaObjectExtraData }
+      qt_meta_data_clickComboBox, 0 }
 };
 
 #ifdef Q_NO_DATA_RELOCATION
@@ -344,8 +286,10 @@ int clickComboBox::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     if (_id < 0)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {
-        if (_id < 1)
-            qt_static_metacall(this, _c, _id, _a);
+        switch (_id) {
+        case 0: sgnHideShow((*reinterpret_cast< QString(*)>(_a[1]))); break;
+        default: ;
+        }
         _id -= 1;
     }
     return _id;
