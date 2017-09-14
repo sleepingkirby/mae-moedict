@@ -18,6 +18,7 @@
 #include <QLineEdit>
 #include <QKeyEvent>
 #include <QDir>
+#include <QList>
 #include "./main.h"
 
 //asset folder path
@@ -1170,10 +1171,25 @@ homepath=n900ext + assets;
 homepath=cwd + assets;
     if(!pathexists(homepath)){
     qWarning() << "current working directory: "+homepath+" doesn't exist. Exhausted all alternatives. Exitting...";
-    exit(0);
+    return "";
     }
 
 return homepath;
+}
+
+
+QString checkfont(QString fontp, int fonti){
+QString exists="";
+    if(ifexists(fontp)){
+    exists="File does exists. Please check permissions.";
+    }
+
+    if(fonti<0){
+    QString msg="Unable to read font at [" + fontp + "]. " + exists;
+    return msg;
+    }
+
+return "";
 }
 
 
@@ -1200,10 +1216,19 @@ int main(int argc, char **argv)
 
 QApplication app (argc, argv);
 app.setApplicationName("mae-moedict");
-//asset path
+
 assetpath=confpath();
-qWarning() << "using assetpath "+assetpath;
 //assetpath="/scratchbox/users/sleepingkirby/home/sleepingkirby/dev/mae-moedict/assets/";
+    if(assetpath==""){
+    QTextEdit *te=new QTextEdit();
+    te->setText("All alternative paths for the asset folder exhausted. Can't find assets folder. Exitting...");
+    te->resize(400, 100);
+    te->show();
+    app.exec();
+    delete(te);
+    return 0;
+    }
+qWarning() << "using assetpath "+assetpath;
 
 
 // set font for chinese
@@ -1212,6 +1237,18 @@ QTextCodec::setCodecForLocale(QTextCodec::codecForName("utf8"));
 QString fontpath=assetpath + "fonts/DroidSansFallbackFull.ttf";
 
 int fontId = QFontDatabase::addApplicationFont(fontpath);//only font that can do zhuyin and characters
+
+//if font doesn't exists but assets folder does or permissons for it are messed up.
+QString checkf=checkfont(fontpath, fontId);
+    if(checkf!=""){
+    QTextEdit *te=new QTextEdit();
+    te->setText(checkf);
+    te->resize(400, 100);
+    te->show();
+    app.exec();
+    delete(te);
+    return 0;
+    }
 
 QString msyh = QFontDatabase::applicationFontFamilies(fontId).at(0);
 QFont font(msyh,10);

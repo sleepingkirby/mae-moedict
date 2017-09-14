@@ -10,7 +10,7 @@ INCLUDEPATH += . include
 QT += core
 QT += sql
 QT += gui
-QT += webkit
+QT += webenginewidgets
 
 # Input
 HEADERS += main.h include/sqlitedb.h

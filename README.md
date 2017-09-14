@@ -14,7 +14,7 @@ All that is needed is the "mae-moedict.exe" and the "assets" folder as they are.
 3) /media/mmc1/.mae-moedict/ (maemo external storage path)
 4) current working directory of "mae-moecit.exe"
 
-If it can't find it, it'll just quit quietly. If ran via a console, it will report that it can't find the assets folder.
+If it can't find it, it'll warn you and quit.
 While it will look for the assents folder, it won't confirm that all the files it needs are in there so please make sure to have the folder as is and not just make a new assets folder.
 
 ---------------------------------------------------- maemo/linux notes below----------------------------------------------------------------------------------------------
