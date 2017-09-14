@@ -33,6 +33,7 @@ QHash<QString,int> zy2num;
 QHash<QString,int> zya2num;
 QHash<int,QString> num2zy;
 QHash<int,QString> num2zya;
+QHash<QString,QString> lbls;
 
 //global rad array
 QList<QString> rad;
@@ -398,7 +399,7 @@ void defpage::setup(int charid){
 	
 
 	QString inTxt="<html><head><style>@font-face{font-family: \"DroidSansFallbackFull\"; src url(\"file:" + assetpath + "DroidSansFallbackFull.ttf\");}" + cssStyle + "</style></head><body>";
-	inTxt += "<h1 id=\"char\">" + chr + "</h1>\n\n[" + rad[rad_id] + "] 部 + " + QString::number(strk_rad) + " = [" + QString::number(strokes) + "] 畫\n\n";
+	inTxt += "<h1 id=\"char\">" + chr + "</h1>\n\n[" + rad[rad_id] + "] " + lbls["part"] + " + " + QString::number(strk_rad) + " = [" + QString::number(strokes) + "] " + lbls["hua"] + "\n\n";
 	QString sep="<hr>\n";
 
 	//zhuyin, pinyin and definition.
@@ -567,9 +568,9 @@ cbzy2->insertItem(-1, "*", -1);
 cbzy3->insertItem(-1, "*", -1);
 cbzya->insertItem(-1, "*", -1);
 
-cbzy1->insertItem(0, "無",0);
-cbzy2->insertItem(0, "無",0);
-cbzy3->insertItem(0, "無",0);
+cbzy1->insertItem(0, lbls["not"],0);
+cbzy2->insertItem(0, lbls["not"],0);
+cbzy3->insertItem(0, lbls["not"],0);
 
 list2Combo(zy1, cbzy1);
 list2Combo(zy2, cbzy2);
@@ -577,7 +578,7 @@ list2Combo(zy3, cbzy3);
 list2Combo(zya, cbzya);
 
 QPushButton *pbSubmit = new QPushButton(this);
-pbSubmit->setText("搜尋");
+pbSubmit->setText(lbls["search"]);
 
 clickTB *tbRes = new clickTB(cbzy1, cbzy2,cbzy3,cbzya, ldlbl);
 tbRes->setParent(this);
@@ -757,7 +758,7 @@ cbnum->setParent(this);
 loadLbl *ldlbl = new loadLbl;
 ldlbl->setParent(this);
 
-cbrad->insertItem(0,"筆畫", 0);
+cbrad->insertItem(0,lbls["stroke"], 0);
 list2ComboRad(rad, radstrk, cbrad);
 
 radg->setAlignment(Qt::AlignHCenter);
@@ -786,7 +787,7 @@ cbnum->hide();
 
 
 QPushButton *pbSubmit = new QPushButton(this);
-pbSubmit->setText("搜尋");
+pbSubmit->setText(lbls["search"]);
 
 clickTB *tbRes = new clickTB(cbrad,cbstrk,cblgeq,cbnum, ldlbl);
 tbRes->setParent(this);
@@ -829,7 +830,7 @@ db->query(sqlstr);
 //select id, char, rad_id, strokes, strk_rad from char where rad_id=112 and strk_rad>1 and strk_rad<10 order by strokes
 
 int israd=1;
-        if(cbzy1->currentText()=="筆畫"){
+        if(cbzy1->currentText()==lbls["stroke"]){
         israd=0;
         }
 QString rtrn="";
@@ -978,10 +979,10 @@ this->show();
 }
 
 void loadLbl::setLoad(){
-this->setText("搜尋中...");
+this->setText(lbls["searching"]);
 }
 void loadLbl::setLoad(QUrl url){
-this->setText("搜尋中...");
+this->setText(lbls["searching"]);
 }
 void loadLbl::setClear(){
 this->setText("");
@@ -1043,7 +1044,7 @@ leIn->setMinimumSize(200,50);
 
 QPushButton *pbSubmit = new QPushButton(this);
 pbSubmit->setFixedWidth(200);
-pbSubmit->setText("搜尋");
+pbSubmit->setText(lbls["search"]);
 
 clickTB *tbRes = new clickTB(leIn, ldlbl);
 tbRes->setParent(this);
@@ -1092,7 +1093,7 @@ leIn->setMinimumSize(200,50);
 
 QPushButton *pbSubmit = new QPushButton(this);
 pbSubmit->setFixedWidth(200);
-pbSubmit->setText("搜尋");
+pbSubmit->setText(lbls["search"]);
 
 clickTB *tbRes = new clickTB(leIn, ldlbl);
 tbRes->setParent(this);
@@ -1119,22 +1120,43 @@ this->setLayout(zyg);
 QString confpath(){
 QString confDirNm="/.mae-moedict";
 QString assets="/assets/";
-QString homepath=QDir::homePath() + confDirNm;
+QString n900MyDocs="/MyDocs/";
+QString n900ext="/media/mmc1" + confDirNm;
+QString cwd=QDir::currentPath();
+QString homepath=QDir::homePath() + confDirNm + assets;
 QDir dirobj(homepath);
 	if(!pathexists(homepath)){
-	qWarning() << "homepath: "+homepath+" doesn't exist. Creating...";
-		if(dirobj.mkdir(homepath)){
-		qWarning() << "Unable to make directory. Please check permissions or create manually.";
-		}
+	qWarning() << "homepath: "+homepath+" doesn't exist. Continuing to search for asset folder.";
 	}
 
-homepath=homepath+assets;
+homepath=QDir::homePath() + n900MyDocs + confDirNm + assets;
 	if(!pathexists(homepath)){
-	qWarning() << "Unable to find assets folder, please make sure assets folder, WITH ASSETS are placed in "+homepath+". Exitting...";
-	exit(EXIT_FAILURE);
+	qWarning() << "homepath: "+homepath+" doesn't exist. Continuing to search for asset folder.";
+	}
+homepath=n900ext + assets;
+	if(!pathexists(homepath)){
+	qWarning() << "external: "+homepath+" doesn't exist. Continuing to search for asset folder.";
+	}
+homepath=cwd + assets;
+	if(!pathexists(homepath)){
+	qWarning() << "current working directory: "+homepath+" doesn't exist. Exhausted all alternatives. Exitting...";
+	exit(0);
 	}
 
 return homepath;
+}
+
+
+void loadlbls(){
+QString sqlq="select eng,chn from lbls";
+
+sqlitedb *db=new sqlitedb(assetpath + "db/mae-moedict.db");
+db->query(sqlq);
+        while(db->result.isValid()){
+        lbls[db->result.value(0).toString()]=db->result.value(1).toString();
+        db->next();
+        }
+db->close();
 }
 
 
@@ -1165,12 +1187,14 @@ QApplication::setFont(font);
 
 QString about= "<html><head><style>" + readCSS() + "</style></head><body id=\"about\"><div>Compiled: 2017-08-03<br><a href=\"https://github.com/sleepingkirby/mae-moedict\">https://github.com/sleepingkirby/mae-moedict</a><br><br>If you find this program useful, please consider donation: <br> 如果你覺得好用，請你考慮捐款我的 <br><br><a href=\"https://www.patreon.com/wklaume\">Patreon</a></div><div><a href=\"https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=3EE2P5RCJ6V9S\">PayPal</a></div><br><br>All suggestions/bug reports are welcome. <br>歡迎所有的錯誤報告和功能請求</body></html>";
 
+loadlbls();
+
 //tab headers
-QString tabzhuyin="注音";
-QString tabstroke="筆畫";
-QString tabrad="部首";
-QString tabdb="自由";
-QString tabeng="英文";
+QString tabzhuyin=lbls["zhuyin"];
+QString tabstroke=lbls["stroke"];
+QString tabrad=lbls["rad"];
+QString tabdb=lbls["free"];
+QString tabeng=lbls["eng"];
 QString tababt="About";
 
 //load global zhuyin
@@ -1227,5 +1251,12 @@ mainLayout->addWidget(maintw,0,0, Qt::AlignCenter);
 pWindow->setLayout(mainLayout);
 qApp->setStyleSheet(readStyle());
 pWindow->setVisible(true);
-return app.exec();
+int i=app.exec();
+
+delete(zy_w);
+delete(rdw);
+delete(frees);
+delete(eng);
+delete(aboutTB);
+return i;
 }
