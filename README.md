@@ -1,7 +1,7 @@
 Traditional Chinese Dicitonary/臺灣正體辭典
 https://github.com/sleepingkirby/mae-moedict
 
-*NOTE: Current compile is for devuan/debian/ubuntu only. Will recompile later for nokia n900*
+*NOTE: Current compile is for devuan/debian/ubuntu.*
 
 
 my first QT application. Made for nokia n900. Also works in linux (tested with Devuan/Debian) Works with qt4.8 only. Requires SQLite and QT4.
@@ -12,7 +12,12 @@ Did this in a rush so there aren't a lot of documentation comments in code.  Bec
 
 Installation:
 The packaging procedures for maemo via QT is a bit buggy didn't have the time to work it out. Put the mae-moedict binary somewhere you can run it. I personally put it under /opt/maemo/dev/mae-moedict/
-Put the assets folder (as is) into /home/user/MyDocs/.mae-moedict/
+Put the assets folder (as is) into one of the following places:
+
+- <homepath, linux, maemo or windows>/.mae-moedict/
+- <maemo homepath/MyDocs>/.mae-moedict/assets/
+- /media/mmc1/.mae-moedict/ (maemo external storage path)
+- current working directory of "mae-moecit.exe"
 
 Run mae-moedict binary and have fun learning.
 
@@ -50,8 +55,11 @@ TextBrowser objects replaced with WebView objects. Allows for full html and CSS 
 UPDATE 2016/07/25
 Added Free, English and About (to make sure the link to the source is available in the program) and Copy functionality (because that needs to be done manually, apparently.).
 
-UPDATE 2017/09/04
+UPDATE 2016/09/04
 Diverted some styles, previously hardcoded, into the style sheets in assets. This is to allow for easier/customization of font sizes, colors, etc. Useful when compiling for different OS's with different themes. 
+
+UPDATE 2017/09/13
+Put all unicode characters meant for the interface into the sql table to allow for the windows version to not choke on compile. Added and uploaded a windows version via QT 5.6
 
 Known Issues: 
 - Due to vfat and the 36000+ ogg files, you can't load it all the files into the same directory. If audio is a must, one of the following must happen:
