@@ -1,7 +1,8 @@
 #include <QObject> 
 #include <QLabel> 
 #include <QUrl>
-#include <QWebView>
+#include <QWebEngineView>
+#include <QWebEnginePage>
 #include <QComboBox>
 #include <sqlitedb.h>
 #include <QGridLayout>
@@ -55,7 +56,7 @@ CREATE TABLE translation(id int primary key, char_id int, lang text, def text);
         QHash<QString, int> tbltrans;
         QGridLayout *glayout;
         //QTextBrowser *deftxt;
-        QWebView *deftxt;
+        QWebEngineView *deftxt;
 
 signals:
 	void loadDefSgn(int i);
@@ -69,14 +70,25 @@ public slots:
 };
 
 
-//class clickTB : public QTextBrowser{
-class clickTB : public QWebView{
+class clickTB : public QWebEngineView{
+Q_OBJECT
+
+public:
+    clickTB();
+};
+
+
+
+
+//class clickTBP : public QTextBrowser{
+class clickTBP : public QWebEnginePage{
 Q_OBJECT
 
 
 public:
-	clickTB(QComboBox *cb1, QComboBox *cb2, QComboBox *cb3, QComboBox *cb4, loadLbl *ldlbl); //to get value of comboboxes
-	clickTB(QLineEdit *lineedit, loadLbl *ldlbl); //to get value of comboboxes
+
+    clickTBP(QComboBox *cb1, QComboBox *cb2, QComboBox *cb3, QComboBox *cb4, loadLbl *ldlbl); //to get value of comboboxes
+    clickTBP(QLineEdit *lineedit, loadLbl *ldlbl); //to get value of comboboxes
 	QString sqlStr();
 	QString db2Str(QString sqlstr);
 
@@ -97,14 +109,16 @@ public:
 	
 	QLineEdit *qle;
 
+    bool acceptNavigationRequest(const QUrl & url, QWebEnginePage::NavigationType type, bool);
+
 signals:
 	void clicked();
+    void linkClicked(const QUrl&);
 
 protected:
 	void mousePressEvent(QMouseEvent* event);
 
 public slots:
-
 	void sgnRun();
         void sgnRadRun();
         void sgnFreeRun();

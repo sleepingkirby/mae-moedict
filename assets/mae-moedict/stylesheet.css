@@ -3,6 +3,15 @@
 vertical-align: middle;
 }
 
+body{
+border-style: inset;
+border-width: 2px;
+border-radius: 2px;
+padding-left: 8px;
+margin: 0px 0px 0px 0px;
+}
+
+
 a{
 font-size: 14pt;
 }
@@ -25,7 +34,5 @@ margin-right: 10px;
 }
 
 #about{
-background-color: black;
-color: white;
 padding-top: 20px;
 }
