@@ -1209,7 +1209,10 @@ qWarning() << "using assetpath "+assetpath;
 // set font for chinese
 QTextCodec::setCodecForLocale(QTextCodec::codecForName("utf8"));
 //QTextCodec::setCodecForCStrings(QTextCodec::codecForLocale());
-int fontId = QFontDatabase::addApplicationFont(assetpath + "fonts/DroidSansFallbackFull.ttf");//only font that can do zhuyin and characters
+QString fontpath=assetpath + "fonts/DroidSansFallbackFull.ttf";
+
+int fontId = QFontDatabase::addApplicationFont(fontpath);//only font that can do zhuyin and characters
+
 QString msyh = QFontDatabase::applicationFontFamilies(fontId).at(0);
 QFont font(msyh,10);
 QApplication::setFont(font);
@@ -1288,5 +1291,6 @@ delete(frees);
 delete(eng);
 delete(aboutTB);
 delete(dp);
+
 return i;
 }
