@@ -10,9 +10,10 @@ https://github.com/racklin/moedict-desktop/
 
 Did this in a rush so there aren't a lot of documentation comments in code.  Because I wanted it done as soon as possible. But, also, QT is horrible to work with. Bad/wrong documentation. Some functions don't work as they should. Inconsistent function parameters for the same class. Can't do much without rewriting your own classes. Needs classes for virtually everything. Some functions just don't plain work (set scroll bars, set dimensions via qss), the css-like syntax is used but only missing other css syntax as well as changed the format of the declarations for no good reason. qss can't be applied to named elements (or at least, no way I could find in the documentation).  And other reasons I don't remember at the moment. 
 
+
 Installation:
 The packaging procedures for maemo via QT is a bit buggy didn't have the time to work it out. Put the mae-moedict binary somewhere you can run it. I personally put it under /opt/maemo/dev/mae-moedict/
-Put the assets folder (as is) into one of the following places:
+Put the assets folder (as is) into one of the following places (the program will yell at you if you don't):
 
 - <homepath, linux, maemo or windows>/.mae-moedict/
 - <maemo homepath/MyDocs>/.mae-moedict/assets/
