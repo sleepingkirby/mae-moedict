@@ -1120,7 +1120,7 @@ this->setLayout(zyg);
 QString confpath(){
 QString confDirNm="/.mae-moedict";
 QString assets="/assets/";
-QString n900MyDocs="/MyDocs/";
+QString n900MyDocs="/MyDocs";
 QString n900ext="/media/mmc1" + confDirNm;
 QString cwd=QDir::currentPath();
 QString homepath=QDir::homePath() + confDirNm + assets;
@@ -1179,15 +1179,16 @@ qWarning() << "using assetpath "+assetpath;
 // set font for chinese
 QTextCodec::setCodecForTr(QTextCodec::codecForName("utf8"));
 QTextCodec::setCodecForCStrings(QTextCodec::codecForLocale());
-int fontId = QFontDatabase::addApplicationFont(assetpath + "fonts/DroidSansFallbackFull.ttf");//only font that can do zhuyin and characters
+QString fontpath=assetpath + "fonts/DroidSansFallbackFull.ttf";
+int fontId = QFontDatabase::addApplicationFont(fontpath);//only font that can do zhuyin and characters
 QString msyh = QFontDatabase::applicationFontFamilies(fontId).at(0);
 QFont font(msyh,10);
 QApplication::setFont(font);
 
-
-QString about= "<html><head><style>" + readCSS() + "</style></head><body id=\"about\"><div>Compiled: 2017-08-03<br><a href=\"https://github.com/sleepingkirby/mae-moedict\">https://github.com/sleepingkirby/mae-moedict</a><br><br>If you find this program useful, please consider donation: <br> 如果你覺得好用，請你考慮捐款我的 <br><br><a href=\"https://www.patreon.com/wklaume\">Patreon</a></div><div><a href=\"https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=3EE2P5RCJ6V9S\">PayPal</a></div><br><br>All suggestions/bug reports are welcome. <br>歡迎所有的錯誤報告和功能請求</body></html>";
-
 loadlbls();
+
+QString about= "<html><head><style>" + readCSS() + lbls["about"];
+
 
 //tab headers
 QString tabzhuyin=lbls["zhuyin"];
