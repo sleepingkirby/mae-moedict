@@ -1,9 +1,23 @@
 Traditional Chinese Dicitonary/臺灣正體辭典
 https://github.com/sleepingkirby/mae-moedict
 
-*NOTE: Current compile is for devuan/debian/ubuntu only. Will recompile later for nokia n900*
+*NOTE: These notes are for the windows version only.* 
+Due to QT 4.8 being almost impossible to build on newer machines, the windows version was built on QT5.6 (as this is the version that both has QWebEngine and still runs on the Visual Studio version that I have). As such there are a few differences between this and the linux/maemo verions. Mostly unnoticeable except for programmers.
+- QT 5.6 was used. As such, different properties/behaviors will occur such as the scrollbar, asynchronous calls and lack of borders on the results box.
+- the css stylesheet was modified to make it look better for the windows theme.
 
 
+All that is needed is the "mae-moedict.exe" and the "assets" folder as they are. "mae-moedict.exe" will look for the "assets" folder in one of 4 places in order:
+
+1) <homepath, linux, maemo or windows>/.mae-moedict/
+2) <maemo homepath/MyDocs>/.mae-moedict/assets/ 
+3) /media/mmc1/.mae-moedict/ (maemo external storage path)
+4) current working directory of "mae-moecit.exe"
+
+If it can't find it, it'll just quit quietly. If ran via a console, it will report that it can't find the assets folder.
+While it will look for the assents folder, it won't confirm that all the files it needs are in there so please make sure to have the folder as is and not just make a new assets folder.
+
+---------------------------------------------------- maemo/linux notes below----------------------------------------------------------------------------------------------
 my first QT application. Made for nokia n900. Also works in linux (tested with Devuan/Debian) Works with qt4.8 only. Requires SQLite and QT4.
 Definitions based off of moedict pack files:
 https://github.com/racklin/moedict-desktop/

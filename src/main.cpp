@@ -1150,7 +1150,7 @@ this->setLayout(zyg);
 QString confpath(){
 QString confDirNm="/.mae-moedict";
 QString assets="/assets/";
-QString n900MyDocs="/MyDocs/";
+QString n900MyDocs="/MyDocs";
 QString n900ext="/media/mmc1" + confDirNm;
 QString cwd=QDir::currentPath();
 QString homepath=QDir::homePath() + confDirNm + assets;
