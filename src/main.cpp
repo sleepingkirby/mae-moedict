@@ -1,7 +1,4 @@
 #include <QApplication>
-#include <QErrorMessage>
-#include <QLabel>
-#include <QTabBar>
 #include <QTabWidget>
 #include <QPushButton>
 #include <QObject>
@@ -11,14 +8,12 @@
 #include <QtGui>
 #include <QTextCodec>
 #include <QHash>
-#include <QtDebug>
 #include <QComboBox>
 #include <QMouseEvent>
 #include <QFileInfo>
 #include <QLineEdit>
 #include <QKeyEvent>
 #include <QDir>
-#include <QList>
 #include "./main.h"
 
 //asset folder path
@@ -1256,7 +1251,7 @@ QApplication::setFont(font);
 
 loadlbls();
 
-QString about= "<html><head><style>" + readCSS() + lbls["about"];
+QString about= "<html><head><style>" + readCSS() + "</style></head><body id=\"about\"><div>Compiled: 2017-08-03<br><a href=\"https://github.com/sleepingkirby/mae-moedict\">https://github.com/sleepingkirby/mae-moedict</a><br><br>If you find this program useful, please consider donation: <br>" + lbls["ifuseful"]+ " <br><br>Patreon: <a href=\"https://www.patreon.com/wklaume\">https://www.patreon.com/wklaume</a></div><div>PayPal: <a href=\"https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=3EE2P5RCJ6V9S\">https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=3EE2P5RCJ6V9S</a></div><br><br>All suggestions/bug reports are welcome. <br>" + lbls["bugsugg"] + "</body></html>";
 
 //tab headers
 QString tabzhuyin=lbls["zhuyin"];

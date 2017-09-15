@@ -3,11 +3,16 @@ https://github.com/sleepingkirby/mae-moedict
 
 *NOTE: These notes are for the windows version only.* 
 Due to QT 4.8 being almost impossible to build on newer machines, the windows version was built on QT5.6 (as this is the version that both has QWebEngine and still runs on the Visual Studio version that I have). As such there are a few differences between this and the linux/maemo verions. Mostly unnoticeable except for programmers.
-- QT 5.6 was used. As such, different properties/behaviors will occur such as the scrollbar, asynchronous calls and lack of borders on the results box.
+- Win7+ 64bit only at this time.
+- Qt 5.6 was used. As such, different properties/behaviors will occur such as the scrollbar, asynchronous calls and lack of borders on the results box.
 - the css stylesheet was modified to make it look better for the windows theme.
+- When I originally did my research, I ran across an article on how Qt can be ran natively on windows. That's not the case. As such, unlike linux or maemo where you can just apt-get install qt5, you have to bundle the DLL's with the program. 
 
 
-All that is needed is the "mae-moedict.exe" and the "assets" folder as they are. "mae-moedict.exe" will look for the "assets" folder in one of 4 places in order:
+The entire program will be bundled within a folder. All that's needed to run the program, assets folder included (read below for more on that and if you want to customize where it is), is within that folder. Simply extract the zip file and run "mae-moedict.exe". Because of the size for the DLL's needed for windows, the complete compiled version will not be on github (github doesn't like 50+MB files for its source), instead, it's on my googledrive:
+https://drive.google.com/open?id=0B83OJsnf-JFLaXJicjZBTUVlbXM
+
+The "assets" folder, as it is, is needed for this program to work. "mae-moedict.exe" will look for the "assets" folder in one of 4 places in order:
 
 1) <homepath, linux, maemo or windows>/.mae-moedict/
 2) <maemo homepath/MyDocs>/.mae-moedict/assets/ 
