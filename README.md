@@ -6,7 +6,8 @@ https://github.com/sleepingkirby/mae-moedict
 
 my first QT application. Made for nokia n900. Also works in linux (tested with Devuan/Debian) Works with qt4.8 only. Requires SQLite and QT4.
 Definitions based off of moedict pack files:
-https://github.com/racklin/moedict-desktop/
+https://github.com/g0v/moedict-app/tree/gh-pages/pack
+json to sql conversion done by moedict2sqlite (I'll upload that soon)
 
 Did this in a rush so there aren't a lot of documentation comments in code.  Because I wanted it done as soon as possible. But, also, QT is horrible to work with. Bad/wrong documentation. Some functions don't work as they should. Inconsistent function parameters for the same class. Can't do much without rewriting your own classes. Needs classes for virtually everything. Some functions just don't plain work (set scroll bars, set dimensions via qss), the css-like syntax is used but only missing other css syntax as well as changed the format of the declarations for no good reason. qss can't be applied to named elements (or at least, no way I could find in the documentation).  And other reasons I don't remember at the moment. 
 
@@ -61,6 +62,11 @@ Diverted some styles, previously hardcoded, into the style sheets in assets. Thi
 
 UPDATE 2017/09/13
 Put all unicode characters meant for the interface into the sql table to allow for the windows version to not choke on compile. Added and uploaded a windows version via QT 5.6
+
+UPDATE 2017/09/30
+Updated the return window for the tab stroke so that any returned result that is part of a separate stroke will be on a new line. It will also group the results by radical and label as such to allow for someone to more easily find the character they're searching for.
+The radical return will also put the results on it's own new line if the results have multiple strokes.
+Added a basic .sql file so that any updated/new .db from "moedict2sqlite" can have the labels needed for the program added.
 
 Known Issues: 
 - Due to vfat and the 36000+ ogg files, you can't load it all the files into the same directory. If audio is a must, one of the following must happen:
