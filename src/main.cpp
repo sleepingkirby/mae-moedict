@@ -857,7 +857,11 @@ QString rtrn="";
 QString cursec="";
 QString temp="";
 QString head="";
-        while(db->result.isValid()){
+QString subhead="";
+int subheadind=0;
+QString top="";
+
+    while(db->result.isValid()){
         if(israd==1){
         //select id, char, rad_id, strokes, strk_rad from char where strokes=1 order by strokes
         //select id, char, rad_id, strokes, strk_rad from char where strokes>1 and strokes<1 order by strokes
@@ -868,12 +872,22 @@ QString head="";
         }
         if(cursec!=temp){
         cursec=temp;
-        head="[" + temp + "] ";
+        head=top+"[" + temp + "] ";
+            if(top==""){
+            top="<br>";
+            }
         }
         else{
         head="";
         }
-    rtrn+= head + "<a href=\"" + protocol + db->result.value(0).toString() + "\"><span>" + db->result.value(1).toString() + "</span></a> ";
+        if(israd==0&&subheadind!=db->result.value(2).toInt()){
+        subheadind=db->result.value(2).toInt();
+        subhead="    ("+rad.at(db->result.value(2).toInt())+") ";
+        }
+        else{
+        subhead="";
+        }
+    rtrn+= head + subhead + "<a href=\"" + protocol + db->result.value(0).toString() + "\"><span>" + db->result.value(1).toString() + "</span></a> ";
         db->next();
         }
 db->close();
@@ -926,7 +940,7 @@ QString where;
     else if(qslgeq=="<="){
         where+=whrcnd + ">=" + qsnum + " and " + whrcnd + "<=" + qsstrk;
     }
-rtrn="select id, char, rad_id, strokes, strk_rad from char where "+ where + " order by strokes";
+rtrn="select id, char, rad_id, strokes, strk_rad from char where "+ where + " order by strokes, rad_id";
 return rtrn;
 }
 
@@ -1251,7 +1265,7 @@ QApplication::setFont(font);
 
 loadlbls();
 
-QString about= "<html><head><style>" + readCSS() + "</style></head><body id=\"about\"><div>Compiled: 2017-08-03<br><a href=\"https://github.com/sleepingkirby/mae-moedict\">https://github.com/sleepingkirby/mae-moedict</a><br><br>If you find this program useful, please consider donation: <br>" + lbls["ifuseful"]+ " <br><br>Patreon: <a href=\"https://www.patreon.com/wklaume\">https://www.patreon.com/wklaume</a></div><div>PayPal: <a href=\"https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=3EE2P5RCJ6V9S\">https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=3EE2P5RCJ6V9S</a></div><br><br>All suggestions/bug reports are welcome. <br>" + lbls["bugsugg"] + "</body></html>";
+QString about= "<html><head><style>" + readCSS() + "</style></head><body id=\"about\"><div>Compiled: 2017-10-05<br><a href=\"https://github.com/sleepingkirby/mae-moedict\">https://github.com/sleepingkirby/mae-moedict</a><br><br>If you find this program useful, please consider donation: <br>" + lbls["ifuseful"]+ " <br><br>Patreon: <a href=\"https://www.patreon.com/wklaume\">https://www.patreon.com/wklaume</a></div><div>PayPal: <a href=\"https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=3EE2P5RCJ6V9S\">https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=3EE2P5RCJ6V9S</a></div><br><br>All suggestions/bug reports are welcome. <br>" + lbls["bugsugg"] + "</body></html>";
 
 //tab headers
 QString tabzhuyin=lbls["zhuyin"];
