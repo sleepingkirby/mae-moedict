@@ -1146,7 +1146,7 @@ homepath=QDir::homePath() + n900MyDocs + confDirNm + assets;
 	qWarning() << "homepath: "+homepath+" doesn't exist. Continuing to search for asset folder.";
 
 homepath=n900ext + assets;
-	if(!pathexists(homepath)){
+	if(pathexists(homepath)){
 	return homepath;
 	}
 	qWarning() << "external: "+homepath+" doesn't exist. Continuing to search for asset folder.";
