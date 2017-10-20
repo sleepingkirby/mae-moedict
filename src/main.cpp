@@ -1,7 +1,4 @@
 #include <QApplication>
-#include <QErrorMessage>
-#include <QLabel>
-#include <QTabBar>
 #include <QTabWidget>
 #include <QPushButton>
 #include <QObject>
@@ -11,7 +8,6 @@
 #include <QtGui>
 #include <QTextCodec>
 #include <QHash>
-#include <QtDebug>
 #include <QComboBox>
 #include <QMouseEvent>
 #include <QFileInfo>
@@ -33,6 +29,7 @@ QHash<QString,int> zy2num;
 QHash<QString,int> zya2num;
 QHash<int,QString> num2zy;
 QHash<int,QString> num2zya;
+QHash<QString,QString> lbls;
 
 //global rad array
 QList<QString> rad;
@@ -398,7 +395,7 @@ void defpage::setup(int charid){
 	
 
 	QString inTxt="<html><head><style>@font-face{font-family: \"DroidSansFallbackFull\"; src url(\"file:" + assetpath + "DroidSansFallbackFull.ttf\");}" + cssStyle + "</style></head><body>";
-	inTxt += "<h1 id=\"char\">" + chr + "</h1>\n\n[" + rad[rad_id] + "] 部 + " + QString::number(strk_rad) + " = [" + QString::number(strokes) + "] 畫\n\n";
+	inTxt += "<h1 id=\"char\">" + chr + "</h1>\n\n[" + rad[rad_id] + "] " + lbls["part"] + " + " + QString::number(strk_rad) + " = [" + QString::number(strokes) + "] " + lbls["hua"] + "\n\n";
 	QString sep="<hr>\n";
 
 	//zhuyin, pinyin and definition.
@@ -567,9 +564,9 @@ cbzy2->insertItem(-1, "*", -1);
 cbzy3->insertItem(-1, "*", -1);
 cbzya->insertItem(-1, "*", -1);
 
-cbzy1->insertItem(0, "無",0);
-cbzy2->insertItem(0, "無",0);
-cbzy3->insertItem(0, "無",0);
+cbzy1->insertItem(0, lbls["not"],0);
+cbzy2->insertItem(0, lbls["not"],0);
+cbzy3->insertItem(0, lbls["not"],0);
 
 list2Combo(zy1, cbzy1);
 list2Combo(zy2, cbzy2);
@@ -577,7 +574,7 @@ list2Combo(zy3, cbzy3);
 list2Combo(zya, cbzya);
 
 QPushButton *pbSubmit = new QPushButton(this);
-pbSubmit->setText("搜尋");
+pbSubmit->setText(lbls["search"]);
 
 clickTB *tbRes = new clickTB(cbzy1, cbzy2,cbzy3,cbzya, ldlbl);
 tbRes->setParent(this);
@@ -757,7 +754,7 @@ cbnum->setParent(this);
 loadLbl *ldlbl = new loadLbl;
 ldlbl->setParent(this);
 
-cbrad->insertItem(0,"筆畫", 0);
+cbrad->insertItem(0,lbls["stroke"], 0);
 list2ComboRad(rad, radstrk, cbrad);
 
 radg->setAlignment(Qt::AlignHCenter);
@@ -786,7 +783,7 @@ cbnum->hide();
 
 
 QPushButton *pbSubmit = new QPushButton(this);
-pbSubmit->setText("搜尋");
+pbSubmit->setText(lbls["search"]);
 
 clickTB *tbRes = new clickTB(cbrad,cbstrk,cblgeq,cbnum, ldlbl);
 tbRes->setParent(this);
@@ -829,13 +826,16 @@ db->query(sqlstr);
 //select id, char, rad_id, strokes, strk_rad from char where rad_id=112 and strk_rad>1 and strk_rad<10 order by strokes
 
 int israd=1;
-        if(cbzy1->currentText()=="筆畫"){
+        if(cbzy1->currentText()==lbls["stroke"]){
         israd=0;
         }
 QString rtrn="";
 QString cursec="";
 QString temp="";
 QString head="";
+QString subhead="";
+int subheadind=0;
+QString top="";
         while(db->result.isValid()){
 		if(israd==1){
 		//select id, char, rad_id, strokes, strk_rad from char where strokes=1 order by strokes
@@ -846,13 +846,23 @@ QString head="";
                 temp=db->result.value(3).toString();
 		}
 		if(cursec!=temp){
-		cursec=temp;
-		head="[" + temp + "] ";
+		cursec=temp;		
+		head=top+"[" + temp + "] ";
+			if(top==""){
+			top="<br>";
+			}
 		}
 		else{
 		head="";
 		}
-	rtrn+= head + "<a href=\"" + db->result.value(0).toString() + "\"><span>" + db->result.value(1).toString() + "</span></a> ";
+		if(israd==0&&subheadind!=db->result.value(2).toInt()){
+		subheadind=db->result.value(2).toInt();
+		subhead="    ("+rad.at(db->result.value(2).toInt())+") ";
+		}
+		else{
+		subhead="";
+		}
+	rtrn+= head + subhead + "<a href=\"" + db->result.value(0).toString() + "\"><span>" + db->result.value(1).toString() + "</span></a> ";
         db->next();
         }
 db->close();
@@ -905,7 +915,7 @@ QString where;
 	else if(qslgeq=="<="){
         where+=whrcnd + ">=" + qsnum + " and " + whrcnd + "<=" + qsstrk;
 	}
-rtrn="select id, char, rad_id, strokes, strk_rad from char where "+ where + " order by strokes";
+rtrn="select id, char, rad_id, strokes, strk_rad from char where "+ where + " order by strokes, rad_id";
 return rtrn;
 }
 
@@ -978,10 +988,10 @@ this->show();
 }
 
 void loadLbl::setLoad(){
-this->setText("搜尋中...");
+this->setText(lbls["searching"]);
 }
 void loadLbl::setLoad(QUrl url){
-this->setText("搜尋中...");
+this->setText(lbls["searching"]);
 }
 void loadLbl::setClear(){
 this->setText("");
@@ -1043,7 +1053,7 @@ leIn->setMinimumSize(200,50);
 
 QPushButton *pbSubmit = new QPushButton(this);
 pbSubmit->setFixedWidth(200);
-pbSubmit->setText("搜尋");
+pbSubmit->setText(lbls["search"]);
 
 clickTB *tbRes = new clickTB(leIn, ldlbl);
 tbRes->setParent(this);
@@ -1092,7 +1102,7 @@ leIn->setMinimumSize(200,50);
 
 QPushButton *pbSubmit = new QPushButton(this);
 pbSubmit->setFixedWidth(200);
-pbSubmit->setText("搜尋");
+pbSubmit->setText(lbls["search"]);
 
 clickTB *tbRes = new clickTB(leIn, ldlbl);
 tbRes->setParent(this);
@@ -1119,30 +1129,64 @@ this->setLayout(zyg);
 QString confpath(){
 QString confDirNm="/.mae-moedict";
 QString assets="/assets/";
-QString n900MyDocs="/MyDocs/";
+QString n900MyDocs="/MyDocs";
 QString n900ext="/media/mmc1" + confDirNm;
 QString cwd=QDir::currentPath();
 QString homepath=QDir::homePath() + confDirNm + assets;
 QDir dirobj(homepath);
-	if(!pathexists(homepath)){
-	qWarning() << "homepath: "+homepath+" doesn't exist. Continuing to search for asset folder.";
+	if(pathexists(homepath)){
+	return homepath;
 	}
+	qWarning() << "homepath: "+homepath+" doesn't exist. Continuing to search for asset folder.";
 
 homepath=QDir::homePath() + n900MyDocs + confDirNm + assets;
-	if(!pathexists(homepath)){
+	if(pathexists(homepath)){
+	return homepath;
+	}
 	qWarning() << "homepath: "+homepath+" doesn't exist. Continuing to search for asset folder.";
-	}
-homepath=n900ext + assets;
-	if(!pathexists(homepath)){
-	qWarning() << "external: "+homepath+" doesn't exist. Continuing to search for asset folder.";
-	}
-homepath=cwd + assets;
-	if(!pathexists(homepath)){
-	qWarning() << "current working directory: "+homepath+" doesn't exist. Exhausted all alternatives. Exitting...";
-	exit(0);
-	}
 
-return homepath;
+homepath=n900ext + assets;
+	if(pathexists(homepath)){
+	return homepath;
+	}
+	qWarning() << "external: "+homepath+" doesn't exist. Continuing to search for asset folder.";
+
+homepath=cwd + assets;
+	if(pathexists(homepath)){
+	return homepath;
+	}
+	qWarning() << "current working directory: "+homepath+" doesn't exist. Exhausted all alternatives. Exitting...";
+
+return "";
+}
+
+
+
+QString checkfont(QString fontp, int fonti){
+QString exists="";
+    if(ifexists(fontp)){
+    exists="File does exists. Please check permissions.";
+    }
+
+    if(fonti<0){
+    QString msg="Unable to read font at [" + fontp + "]. " + exists;
+    return msg;
+    }
+
+return "";
+}
+
+
+void loadlbls(){
+QString sqlq="select eng,chn from lbls";
+
+sqlitedb *db=new sqlitedb(assetpath + "db/mae-moedict.db");
+db->query(sqlq);
+        while(db->result.isValid()){
+        lbls[db->result.value(0).toString()]=db->result.value(1).toString();
+        db->next();
+        }
+db->close();
 }
 
 
@@ -1158,28 +1202,54 @@ QApplication app (argc, argv);
 app.setApplicationName("mae-moedict");
 //asset path
 assetpath=confpath();
+//assetpath="/scratchbox/users/sleepingkirby/home/sleepingkirby/dev/mae-moedict/assets/";
+    if(assetpath==""){
+    QTextEdit *te=new QTextEdit();
+    te->setText("All alternative paths for the asset folder exhausted. Can't find assets folder. Exitting...");
+    te->resize(400, 100);
+    te->show();
+    app.exec();
+    delete(te);
+    return 0;
+    }
 qWarning() << "using assetpath "+assetpath;
 //assetpath="/scratchbox/users/sleepingkirby/home/sleepingkirby/dev/mae-moedict/assets/";
-
 
 
 // set font for chinese
 QTextCodec::setCodecForTr(QTextCodec::codecForName("utf8"));
 QTextCodec::setCodecForCStrings(QTextCodec::codecForLocale());
-int fontId = QFontDatabase::addApplicationFont(assetpath + "fonts/DroidSansFallbackFull.ttf");//only font that can do zhuyin and characters
+QString fontpath=assetpath + "fonts/DroidSansFallbackFull.ttf";
+int fontId = QFontDatabase::addApplicationFont(fontpath);//only font that can do zhuyin and characters
+
+
+//if font doesn't exists but assets folder does or permissons for it are messed up.
+QString checkf=checkfont(fontpath, fontId);
+    if(checkf!=""){
+    QTextEdit *te=new QTextEdit();
+    te->setText(checkf);
+    te->resize(400, 100);
+    te->show();
+    app.exec();
+    delete(te);
+    return 0;
+    }
+
 QString msyh = QFontDatabase::applicationFontFamilies(fontId).at(0);
 QFont font(msyh,10);
 QApplication::setFont(font);
 
+loadlbls();
 
-QString about= "<html><head><style>" + readCSS() + "</style></head><body id=\"about\"><div>Compiled: 2017-08-03<br><a href=\"https://github.com/sleepingkirby/mae-moedict\">https://github.com/sleepingkirby/mae-moedict</a><br><br>If you find this program useful, please consider donation: <br> 如果你覺得好用，請你考慮捐款我的 <br><br><a href=\"https://www.patreon.com/wklaume\">Patreon</a></div><div><a href=\"https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=3EE2P5RCJ6V9S\">PayPal</a></div><br><br>All suggestions/bug reports are welcome. <br>歡迎所有的錯誤報告和功能請求</body></html>";
+QString about= "<html><head><style>" + readCSS() + "</style></head><body id=\"about\"><div>Compiled: 2017-09-30<br><a href=\"https://github.com/sleepingkirby/mae-moedict\">https://github.com/sleepingkirby/mae-moedict</a><br><br>If you find this program useful, please consider donation: <br>" + lbls["ifuseful"]+ " <br><br>Patreon: <a href=\"https://www.patreon.com/wklaume\">https://www.patreon.com/wklaume</a></div><div>PayPal: <a href=\"https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=3EE2P5RCJ6V9S\">https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=3EE2P5RCJ6V9S</a></div><br><br>All suggestions/bug reports are welcome. <br>" + lbls["bugsugg"] + "</body></html>";
+
 
 //tab headers
-QString tabzhuyin="注音";
-QString tabstroke="筆畫";
-QString tabrad="部首";
-QString tabdb="自由";
-QString tabeng="英文";
+QString tabzhuyin=lbls["zhuyin"];
+QString tabstroke=lbls["stroke"];
+QString tabrad=lbls["rad"];
+QString tabdb=lbls["free"];
+QString tabeng=lbls["eng"];
 QString tababt="About";
 
 //load global zhuyin
@@ -1236,5 +1306,12 @@ mainLayout->addWidget(maintw,0,0, Qt::AlignCenter);
 pWindow->setLayout(mainLayout);
 qApp->setStyleSheet(readStyle());
 pWindow->setVisible(true);
-return app.exec();
+int i=app.exec();
+
+delete(zy_w);
+delete(rdw);
+delete(frees);
+delete(eng);
+delete(aboutTB);
+return i;
 }

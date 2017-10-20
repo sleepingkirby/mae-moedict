@@ -53,6 +53,9 @@ Added Free, English and About (to make sure the link to the source is available 
 UPDATE 2017/09/04
 Diverted some styles, previously hardcoded, into the style sheets in assets. This is to allow for easier/customization of font sizes, colors, etc. Useful when compiling for different OS's with different themes. 
 
+UPDATE 2017/10/19
+Updated source to master branch and it's improvement
+
 Known Issues: 
 - Due to vfat and the 36000+ ogg files, you can't load it all the files into the same directory. If audio is a must, one of the following must happen:
   1) device a tree directory structure to hold all the audio files.
