@@ -19,7 +19,7 @@ Put the assets folder (as is) into one of the following places (the program will
 - <homepath, linux, maemo or windows>/.mae-moedict/
 - <maemo homepath/MyDocs>/.mae-moedict/assets/
 - /media/mmc1/.mae-moedict/ (maemo external storage path)
-- current working directory of "mae-moecit.exe"
+- current working directory of "mae-moedict.exe"
 
 Run mae-moedict binary and have fun learning.
 
@@ -27,12 +27,12 @@ Run mae-moedict binary and have fun learning.
 Here's how I did it:
 Get on a linux computer
 open the terminal
-copy over the sqlite db from assets/db/mae-moedict.db into a folder
+copy over the sqlite db from assets/db/mae-moedict.db into the assets folder
 do:
 --------------------------
 mkdir voices
 cd voices
-for n in `sqlite3 ../mae-moedict.db  "select num from hold where num!=''"|grep -Ei "[a-z]"`;do wget https://203146b5091e8f0aafda-15d41c68795720c6e932125f5ace0c70.ssl.cf1.rackcdn.com/$n.ogg;done
+for n in `sqlite3 ../mae-moedict.db  "select num from hold where num!=''"`;do wget https://203146b5091e8f0aafda-15d41c68795720c6e932125f5ace0c70.ssl.cf1.rackcdn.com/$n.ogg;done
 --------------------------
 
 
@@ -68,11 +68,14 @@ Updated the return window for the tab stroke so that any returned result that is
 The radical return will also put the results on it's own new line if the results have multiple strokes.
 Added a basic .sql file so that any updated/new .db from "moedict2sqlite" can have the labels needed for the program added.
 
+UPDATE 2017/12/13
+Changed the "num" column in the table "hold" to text from string. This prevents the truncation of the num that has any leading zero's. This allows for download of all audio files.
+
 Known Issues: 
 - Due to vfat and the 36000+ ogg files, you can't load it all the files into the same directory. If audio is a must, one of the following must happen:
   1) device a tree directory structure to hold all the audio files.
   2) use a file system like ext2 (just not fat) to hold the files. 
-- Audio in definitions page won't play. Probably due to QT limitations on the nokia n900
+- Audio in definitions will play, but you can't hear the audio. Probably due to QT limitations/bug.
 - Added a work around to include the path + mplayer to the definitions. Can be copied and pasted into the terminal.
 
 
