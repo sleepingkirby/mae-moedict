@@ -13,4 +13,5 @@ INSERT INTO "lbls" VALUES(9,'search','搜尋','trad_chn');
 INSERT INTO "lbls" VALUES(10,'searching','搜尋中...','trad_chn');
 INSERT INTO "lbls" VALUES(11,'ifuseful','如果你覺得好用，請你考慮捐款我的','trad_chn');
 INSERT INTO "lbls" VALUES(12,'bugsugg','歡迎所有的錯誤報告和功能請求','trad_chn');
+INSERT INTO "lbls" VALUES(13,'learn','學習','trad_chn');
 COMMIT;

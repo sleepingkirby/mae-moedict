@@ -20,6 +20,8 @@
 //asset folder path
 QString assetpath;
 
+QString dictDb;
+
 //global zhuyin arrays
 QList<QString> zy1;
 QList<QString> zy2;
@@ -43,7 +45,7 @@ defpage *dp;
 void loadRad2Num(){
 QString sqlq="select char,id from radical order by id";
 
-sqlitedb *db=new sqlitedb(assetpath + "db/mae-moedict.db");
+sqlitedb *db=new sqlitedb(assetpath + dictDb);
 db->query(sqlq);
         while(db->result.isValid()){
 	rad2num[db->result.value(0).toString()]=db->result.value(1).toInt();
@@ -57,7 +59,7 @@ db->close();
 void loadNum2Zy(){
 QString sqlq="select id,char from zhuyin order by id";
 
-sqlitedb *db=new sqlitedb(assetpath + "db/mae-moedict.db");
+sqlitedb *db=new sqlitedb(assetpath + dictDb);
 db->query(sqlq);
         while(db->result.isValid()){
 	num2zy[db->result.value(0).toInt()]=db->result.value(1).toString();
@@ -69,7 +71,7 @@ db->close();
 void loadNum2Zya(){
 QString sqlq="select id, char from zhuyinTone order by id";
 
-sqlitedb *db=new sqlitedb(assetpath + "db/mae-moedict.db");
+sqlitedb *db=new sqlitedb(assetpath + dictDb);
 db->query(sqlq);
         while(db->result.isValid()){
 	num2zya[db->result.value(0).toInt()]=db->result.value(1).toString();
@@ -81,7 +83,7 @@ db->close();
 void loadZy2Num(){
 QString sqlq="select char, id from zhuyin order by id";
 
-sqlitedb *db=new sqlitedb(assetpath + "db/mae-moedict.db");
+sqlitedb *db=new sqlitedb(assetpath + dictDb);
 db->query(sqlq);
         while(db->result.isValid()){
 	zy2num[db->result.value(0).toString()]=db->result.value(1).toInt();
@@ -93,7 +95,7 @@ db->close();
 void loadZya2Num(){
 QString sqlq="select char, id from zhuyinTone order by id";
 
-sqlitedb *db=new sqlitedb(assetpath + "db/mae-moedict.db");
+sqlitedb *db=new sqlitedb(assetpath + dictDb);
 db->query(sqlq);
         while(db->result.isValid()){
 	zya2num[db->result.value(0).toString()]=db->result.value(1).toInt();
@@ -146,7 +148,7 @@ zy1.append(""); //using these space out the zero index
 zy2.append("");
 zy3.append("");
 zya.append("");
-sqlitedb *db=new sqlitedb(assetpath + "db/mae-moedict.db");
+sqlitedb *db=new sqlitedb(assetpath + dictDb);
 db->query("select char from zhuyin order by id");
         while(db->result.isValid()){
                 if(i>=zyn1[0]&&i<=zyn1[1]){
@@ -175,7 +177,7 @@ void loadRad(){
 int i=1;
 rad.append("");//qlists have to have an index zero or it'll crash. 
 radstrk.append(0);//qlists have to have an index zero or it'll crash. 
-sqlitedb *db=new sqlitedb(assetpath + "db/mae-moedict.db");
+sqlitedb *db=new sqlitedb(assetpath + dictDb);
 db->query("select char,stroke from radical order by id");
         while(db->result.isValid()){
         rad.insert(i,db->result.value(0).toString());
@@ -332,7 +334,7 @@ return rtrn;
 void defpage::setup(int charid){
 
 	this->setWindowTitle(QString::number(charid));
-	sqlitedb *db=new sqlitedb(assetpath + "db/mae-moedict.db");
+	sqlitedb *db=new sqlitedb(assetpath + dictDb);
 	QString q="select id,char,unum,rad_id,strokes,strk_rad from char where id=" + QString::number(charid);
 	//qDebug() << q;
 	db->query(q);
@@ -633,7 +635,7 @@ llbl->setClear();
 }
 
 QString clickTB::db2Str(QString sqlstr){
-sqlitedb *db=new sqlitedb(assetpath + "db/mae-moedict.db");
+sqlitedb *db=new sqlitedb(assetpath + dictDb);
 db->query(sqlstr);
 QString rtrn="";
 QString curzy="";
@@ -818,7 +820,7 @@ llbl->setClear();
 }
 
 QString clickTB::radDb2Str(QString sqlstr){
-sqlitedb *db=new sqlitedb(assetpath + "db/mae-moedict.db");
+sqlitedb *db=new sqlitedb(assetpath + dictDb);
 db->query(sqlstr);
 //select id, char, rad_id, strokes, strk_rad from char where strokes=1 order by strokes
 //select id, char, rad_id, strokes, strk_rad from char where strokes>1 and strokes<1 order by strokes
@@ -930,7 +932,7 @@ return sqlq;
 }
 
 QString clickTB::freeDb2Str(QString sqlstr){
-sqlitedb *db=new sqlitedb(assetpath + "db/mae-moedict.db");
+sqlitedb *db=new sqlitedb(assetpath + dictDb);
 db->query(sqlstr);
 QString rtrn="";
 QString head="";
@@ -952,7 +954,7 @@ return sqlq;
 }
 
 QString clickTB::engDb2Str(QString sqlstr){
-sqlitedb *db=new sqlitedb(assetpath + "db/mae-moedict.db");
+sqlitedb *db=new sqlitedb(assetpath + dictDb);
 db->query(sqlstr);
 QString rtrn="";
 QString head="";
@@ -1126,6 +1128,67 @@ this->setLayout(zyg);
 }
 
 
+/*-------------------------
+pre:
+post:
+learning tabl
+--------------------------*/
+class lrnTb : public QWidget{
+public:
+	void setup();
+};
+
+
+/*-----------------------------------------------------
+ * pre:
+ * post:
+ * populates the widget of thiis class with the things
+ * it needs. 
+------------------------------------------------------*/
+void lrnTb::setup(){
+QGridLayout *zyg=new QGridLayout(this);
+zyg->setAlignment(Qt::AlignHCenter);
+
+QLineEdit *leIn = new QLineEdit(this);
+loadLbl *ldlbl=new loadLbl;
+ldlbl->setParent(this);
+
+leIn->setMinimumSize(200,50);
+
+
+QPushButton *pbSubmit = new QPushButton(this);
+pbSubmit->setFixedWidth(200);
+pbSubmit->setText(lbls["search"]);
+
+clickTB *tbRes = new clickTB(leIn, ldlbl);
+tbRes->setParent(this);
+
+
+zyg->addWidget(leIn,0,0,Qt::AlignTop | Qt::AlignLeft);
+zyg->addWidget(ldlbl,1,0,Qt::AlignTop);
+zyg->addWidget(pbSubmit,1,3,Qt::AlignTop | Qt::AlignRight);
+zyg->addWidget(tbRes,2,0,1,4,Qt::AlignBottom);
+
+//connect button to clickTB slot to call function to get zhuyin from comboboxes then run sql query
+QObject::connect(pbSubmit, SIGNAL(pressed()), ldlbl, SLOT(setLoad()));
+QObject::connect(pbSubmit, SIGNAL(released()), tbRes, SLOT(sgnEngRun()));
+
+//QObject::connect(tbRes, SIGNAL(linkClicked(QUrl)), ldlbl, SLOT(setLoad(QUrl)));
+QObject::connect(tbRes, SIGNAL(linkClicked(QUrl)), dp, SLOT(sgnRun(QUrl)));
+//QObject::connect(dp, SIGNAL(loadDefSgn(int)), dp, SLOT(sgnLoadDef(int)));
+//QObject::connect(tbRes, SIGNAL(linkClicked(QUrl)), ldlbl, SLOT(setClear(QUrl)));
+
+this->setLayout(zyg);
+}
+
+
+
+
+/*-----------------------------------------
+pre: Qt functions
+post: none 
+tries to determine the path of the assets folder across all the different OS's
+-------------------------------------------*/
 QString confpath(){
 QString confDirNm="/.mae-moedict";
 QString assets="/assets/";
@@ -1176,11 +1239,15 @@ QString exists="";
 return "";
 }
 
-
+/*---------------------------
+pre: custom sqldb class previous written
+post: program global lbls populated
+populates the lbls with lbls in the DB as the windows version can't handle UTF text very well if it's written in the source code files
+----------------------------*/
 void loadlbls(){
 QString sqlq="select eng,chn from lbls";
 
-sqlitedb *db=new sqlitedb(assetpath + "db/mae-moedict.db");
+sqlitedb *db=new sqlitedb(assetpath + dictDb);
 db->query(sqlq);
         while(db->result.isValid()){
         lbls[db->result.value(0).toString()]=db->result.value(1).toString();
@@ -1202,6 +1269,7 @@ QApplication app (argc, argv);
 app.setApplicationName("mae-moedict");
 //asset path
 assetpath=confpath();
+dictDb="db/mae-moedict.db";
 //assetpath="/scratchbox/users/sleepingkirby/home/sleepingkirby/dev/mae-moedict/assets/";
     if(assetpath==""){
     QTextEdit *te=new QTextEdit();
@@ -1251,6 +1319,7 @@ QString tabrad=lbls["rad"];
 QString tabdb=lbls["free"];
 QString tabeng=lbls["eng"];
 QString tababt="About";
+QString tabLearn=lbls["learn"];
 
 //load global zhuyin
 loadZhuyin();
@@ -1295,10 +1364,15 @@ aboutTB->setMinimumSize(780,400);
 aboutGL->addWidget(aboutTB,0,0,Qt::AlignCenter);
 aboutw->setLayout(aboutGL);
 
+//learn tab (random and personal dicitonary
+lrnTb *lrn=new lrnTb();
+lrn->setup();
+
 maintw->addTab(zy_w, tabzhuyin);
 maintw->addTab(rdw, tabstroke + "/" + tabrad);
 maintw->addTab(frees, tabdb);
 maintw->addTab(eng, tabeng);
+maintw->addTab(lrn, tabLearn);
 maintw->addTab(aboutw, tababt);
 
 mainLayout->addWidget(maintw,0,0, Qt::AlignCenter);
