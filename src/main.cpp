@@ -509,6 +509,7 @@ int charid=url.toString().toInt();
 //emit loadDefSgn(charid); a fix to try to generate a searching dialog when a link is clicked that failed. as even chained signals don't get drawn/ran until all the actions are done.
 this->setup(charid);
 this->show();
+this->activateWindow();
 }
 
 //not being used anymore
