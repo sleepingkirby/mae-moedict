@@ -14,6 +14,7 @@
 #include <QLineEdit>
 #include <QWebFrame>
 #include <QKeyEvent>
+#include <QCheckBox>
 #include <QDir>
 #include "./main.h"
 
@@ -37,6 +38,13 @@ QHash<QString,QString> lbls;
 QList<QString> rad;
 QList<int> radstrk;
 QHash<QString, int> rad2num;
+
+//holding QList for personal list and random word holder
+QList<QString> rnd;
+QList<QString> pList; //personal word list
+
+//Max number of char
+int charMax;
 
 //global defpage
 defpage *dp;
@@ -630,6 +638,29 @@ llbl=ldlbl;
 qle=lineedit;	
 }
 
+
+//allows to set a width and height
+clickTB::clickTB(int minw,int minh, int maxw, int maxh, QList<QString> &words){
+//this->setOpenLinks(false);
+this->setMinimumSize(minw,minh);
+this->setMaximumSize(maxw,maxh);
+int i=0;
+int max=words.count();
+QString into="";
+	if(max>0){
+		while(i<max){
+		into=into+"<p>"+words[i]+"</p>";
+		i++;
+		}
+
+	this->setHtml("<html><header></header><body>" + into + "</body></html>");
+	}
+this->page()->currentFrame()->setScrollBarPolicy(Qt::Vertical,Qt::ScrollBarAsNeeded);
+this->page()->setLinkDelegationPolicy(QWebPage::DelegateAllLinks);
+}
+
+
+
 void clickTB::sgnRun(){
 this->setHtml(db2Str(sqlStr()));
 llbl->setClear();
@@ -1148,36 +1179,37 @@ public:
 ------------------------------------------------------*/
 void lrnTb::setup(){
 QGridLayout *zyg=new QGridLayout(this);
+
 zyg->setAlignment(Qt::AlignHCenter);
+rnd.append("random");
+pList.append("list1");
+pList.append("list2");
+pList.append("list3");
+pList.append("list4");
+pList.append("list5");
+pList.append("list6");
+pList.append("list7");
+pList.append("list8");
+pList.append("list9");
+pList.append("list10");
+pList.append("list11");
+pList.append("list12");
+pList.append("list13");
+pList.append("list14");
+pList.append("list15");
+pList.append("list16");
+pList.append("list17");
+clickTB *rndChar = new clickTB(40,40,80,80,rnd);
+clickTB *myList=new clickTB(40,40,370,470,pList);
+QWidget *vrtLn=new QWidget;
+vrtLn->setFixedWidth(2);
+vrtLn->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+vrtLn->setStyleSheet(QString("background-color: #FFFFFF;"));
 
-QLineEdit *leIn = new QLineEdit(this);
-loadLbl *ldlbl=new loadLbl;
-ldlbl->setParent(this);
-
-leIn->setMinimumSize(200,50);
-
-
-QPushButton *pbSubmit = new QPushButton(this);
-pbSubmit->setFixedWidth(200);
-pbSubmit->setText(lbls["search"]);
-
-clickTB *tbRes = new clickTB(leIn, ldlbl);
-tbRes->setParent(this);
-
-
-zyg->addWidget(leIn,0,0,Qt::AlignTop | Qt::AlignLeft);
-zyg->addWidget(ldlbl,1,0,Qt::AlignTop);
-zyg->addWidget(pbSubmit,1,3,Qt::AlignTop | Qt::AlignRight);
-zyg->addWidget(tbRes,2,0,1,4,Qt::AlignBottom);
-
-//connect button to clickTB slot to call function to get zhuyin from comboboxes then run sql query
-QObject::connect(pbSubmit, SIGNAL(pressed()), ldlbl, SLOT(setLoad()));
-QObject::connect(pbSubmit, SIGNAL(released()), tbRes, SLOT(sgnEngRun()));
-
-//QObject::connect(tbRes, SIGNAL(linkClicked(QUrl)), ldlbl, SLOT(setLoad(QUrl)));
-QObject::connect(tbRes, SIGNAL(linkClicked(QUrl)), dp, SLOT(sgnRun(QUrl)));
-//QObject::connect(dp, SIGNAL(loadDefSgn(int)), dp, SLOT(sgnLoadDef(int)));
-//QObject::connect(tbRes, SIGNAL(linkClicked(QUrl)), ldlbl, SLOT(setClear(QUrl)));
+zyg->addWidget(rndChar,0,0,Qt::AlignTop | Qt::AlignLeft);
+zyg->addWidget(vrtLn,1,0,2,2,Qt::AlignTop | Qt::AlignLeft);
+zyg->addWidget(myList,0,5,4,4,Qt::AlignTop | Qt::AlignRight);
+//zyg->addWidget(tbRes,0,1,1,1,Qt::AlignTop | Qt::AlignLeft);
 
 this->setLayout(zyg);
 }
@@ -1257,6 +1289,23 @@ db->query(sqlq);
 db->close();
 }
 
+/*-----------------------------------------------------
+pre: the sqldb class and the database existing
+post: the max filled
+gets the last character 
+-----------------------------------------------------*/
+void getMax(){
+QString sqlq="select id from char order by id desc limit 1";
+
+sqlitedb *db=new sqlitedb(assetpath + dictDb);
+db->query(sqlq);
+        while(db->result.isValid()){
+        charMax=db->result.value(0).toInt();
+        db->next();
+        }
+db->close();
+
+}
 
 /*-----------------------------------------------------
  * pre:
