@@ -11,10 +11,6 @@ a:hover{
 background-color: yellow;
 }
 
-a:visied{
-color: red;
-}
-
 .free{
 margin-right: 15px;
 }
@@ -22,6 +18,10 @@ margin-right: 15px;
 .eng{
 display: block;
 margin-right: 10px;
+}
+
+.rnd{
+font-size: 16pt;
 }
 
 #about{

@@ -79,7 +79,7 @@ public:
 	clickTB(QComboBox *cb1, QComboBox *cb2, QComboBox *cb3, QComboBox *cb4, loadLbl *ldlbl); //to get value of comboboxes
 	clickTB(QLineEdit *lineedit, loadLbl *ldlbl); //to get value of comboboxes
 	clickTB(); //to get value of comboboxes
-	clickTB(int minw, int minh, int maxw, int maxh, QList<QString> &words); //to get value of comboboxes
+	clickTB(int minw, int minh, int maxw, int maxh); //to get value of comboboxes
 	QString sqlStr();
 	QString db2Str(QString sqlstr);
 

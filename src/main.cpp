@@ -16,12 +16,14 @@
 #include <QKeyEvent>
 #include <QCheckBox>
 #include <QDir>
+#include <QGroupBox>
 #include "./main.h"
 
 //asset folder path
 QString assetpath;
 
 QString dictDb;
+QString pdictDb;
 
 //global zhuyin arrays
 QList<QString> zy1;
@@ -40,8 +42,8 @@ QList<int> radstrk;
 QHash<QString, int> rad2num;
 
 //holding QList for personal list and random word holder
-QList<QString> rnd;
-QList<QString> pList; //personal word list
+QHash<int,QString> rnd;
+QHash<int,QString> pList; //personal word list
 
 //Max number of char
 int charMax;
@@ -116,9 +118,7 @@ void list2Combo(QList<QString> &ls, QComboBox *cb){
 int cbi=cb->count();
 int i=1;
 int size=ls.count();
-//qDebug() << "---------------------------";
 	while(i<size){
-//	qDebug() << i << ": " << ls[i];
 	cb->insertItem(cbi,ls[i],i);
 	cbi++;
 	i++;
@@ -129,9 +129,7 @@ void list2ComboRad(QList<QString> &ls, QList<int> &lsi, QComboBox *cb){
 int cbi=cb->count();
 int i=1;
 int size=ls.count();
-//qDebug() << "---------------------------";
 	while(i<size){
-//	qDebug() << "ls["<< i << "]: " << ls[i] << ", "<< lsi[i];
 	cb->insertItem(cbi, "[" + QString::number(lsi[i]) + "] " + ls[i],i);
 	cbi++;
 	i++;
@@ -640,21 +638,12 @@ qle=lineedit;
 
 
 //allows to set a width and height
-clickTB::clickTB(int minw,int minh, int maxw, int maxh, QList<QString> &words){
+//for learn tab
+clickTB::clickTB(int minw,int minh, int maxw, int maxh){
 //this->setOpenLinks(false);
 this->setMinimumSize(minw,minh);
 this->setMaximumSize(maxw,maxh);
 int i=0;
-int max=words.count();
-QString into="";
-	if(max>0){
-		while(i<max){
-		into=into+"<p>"+words[i]+"</p>";
-		i++;
-		}
-
-	this->setHtml("<html><header></header><body>" + into + "</body></html>");
-	}
 this->page()->currentFrame()->setScrollBarPolicy(Qt::Vertical,Qt::ScrollBarAsNeeded);
 this->page()->setLinkDelegationPolicy(QWebPage::DelegateAllLinks);
 }
@@ -1167,8 +1156,44 @@ learning tabl
 --------------------------*/
 class lrnTb : public QWidget{
 public:
+	bool pDbExists;	//bool check to make sure personal db exists.
 	void setup();
+	bool chckPersDict();
+	QHash<int,QString> loadPDict();
+	bool add2PList();
+	bool delFrmPList();
+
 };
+
+
+/*---------------------------
+pre: custom SQL Lib
+post: pList is populated;
+load all list
+select c.id as id, c.char as char, h.pinyin as pinyin, h.zhuyin as zhuyin, d.e as edef from char as c left join hold as h on c.id=h.char_id left join def as d on h.id=d.hold_id where c.id=
+----------------------------*/
+QHash<int,QString> lrnTb::loadPDict(){
+QString sqlq="select id, char from personal"; 
+
+sqlitedb *pdb=new sqlitedb(assetpath + pdictDb);
+pdb->query(sqlq);
+        while(pdb->result.isValid()){
+        pList[pdb->result.value(0).toInt()]=pdb->result.value(1).toString();
+        pdb->next();
+        }
+
+pdb->close();
+return pList;
+}
+
+/*-------------------------
+pre:
+post:
+checks to make sure that the personal dictionary exists
+-------------------------*/
+bool lrnTb::chckPersDict(){
+return ifexists(assetpath + pdictDb);
+}
 
 
 /*-----------------------------------------------------
@@ -1178,40 +1203,83 @@ public:
  * it needs. 
 ------------------------------------------------------*/
 void lrnTb::setup(){
-QGridLayout *zyg=new QGridLayout(this);
+QGridLayout *mnGrd=new QGridLayout(this);
+mnGrd->setAlignment(Qt::AlignHCenter);
 
-zyg->setAlignment(Qt::AlignHCenter);
-rnd.append("random");
-pList.append("list1");
-pList.append("list2");
-pList.append("list3");
-pList.append("list4");
-pList.append("list5");
-pList.append("list6");
-pList.append("list7");
-pList.append("list8");
-pList.append("list9");
-pList.append("list10");
-pList.append("list11");
-pList.append("list12");
-pList.append("list13");
-pList.append("list14");
-pList.append("list15");
-pList.append("list16");
-pList.append("list17");
-clickTB *rndChar = new clickTB(40,40,80,80,rnd);
-clickTB *myList=new clickTB(40,40,370,470,pList);
-QWidget *vrtLn=new QWidget;
-vrtLn->setFixedWidth(2);
-vrtLn->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
-vrtLn->setStyleSheet(QString("background-color: #FFFFFF;"));
+pDbExists=this->chckPersDict();
 
-zyg->addWidget(rndChar,0,0,Qt::AlignTop | Qt::AlignLeft);
-zyg->addWidget(vrtLn,1,0,2,2,Qt::AlignTop | Qt::AlignLeft);
-zyg->addWidget(myList,0,5,4,4,Qt::AlignTop | Qt::AlignRight);
-//zyg->addWidget(tbRes,0,1,1,1,Qt::AlignTop | Qt::AlignLeft);
+QComboBox *wDB=new QComboBox(this);
+wDB->addItem(lbls["all"]+lbls["dict"],0);
+	if(pDbExists){
+	wDB->addItem(lbls["pers"]+lbls["dict"],1);
+	}
 
-this->setLayout(zyg);
+//ComboBox for which dictionary
+//rnd.append("<a class=\"rnd\" href=\"#\">"+lbls["rand"]+"</a>");
+//pList.append("list1");
+clickTB *rndChar = new clickTB(40,40,200,70);
+
+clickTB *myList=new clickTB(40,40,370,470);
+
+QPushButton *pbSubmit = new QPushButton(this);
+pbSubmit->setText(lbls["search"]);
+
+
+//GroupBox Random
+QGroupBox *rndBox=new QGroupBox(lbls["rand"]);
+rndBox->setMinimumWidth(390);
+QGridLayout *rndBoxL=new QGridLayout(rndBox);
+rndBox->setAlignment(Qt::AlignLeft);
+QWidget *spacer=new QWidget(this);
+spacer->setMinimumHeight(3);
+
+rndBoxL->addWidget(spacer,0,0,1,3,Qt::AlignVCenter | Qt::AlignHCenter);
+rndBoxL->addWidget(rndChar,1,0,2,1,Qt::AlignVCenter | Qt::AlignHCenter);
+rndBoxL->addWidget(wDB,1,2,1,1,Qt::AlignVCenter | Qt::AlignRight);
+rndBoxL->addWidget(pbSubmit,2,2,1,1,Qt::AlignVCenter | Qt::AlignRight);
+rndBox->setLayout(rndBoxL);
+
+QWidget *vspacer=new QWidget(this);
+vspacer->setMinimumHeight(3);
+
+//GroupBox Personal Dictionary
+QGroupBox *persDictBox=new QGroupBox(lbls["pers"]+lbls["dict"]);
+QGridLayout *persDictL=new QGridLayout(persDictBox);
+persDictL->addWidget(vspacer,0,0,1,1,Qt::AlignVCenter | Qt::AlignHCenter);
+persDictL->addWidget(myList,1,0,1,1,Qt::AlignVCenter | Qt::AlignHCenter);
+persDictBox->setLayout(persDictL);
+
+//controls for the personal
+QGroupBox *persDictCtrlBox=new QGroupBox(lbls["pers"]+lbls["dict"]);
+persDictCtrlBox->setMinimumWidth(390);
+persDictCtrlBox->setMinimumHeight(300);
+
+QGridLayout *persDictCtrlBoxL=new QGridLayout(persDictCtrlBox);
+QWidget *persDictCtrlSpace=new QWidget(persDictCtrlBox);
+persDictCtrlSpace->setMinimumHeight(3);
+QLineEdit *add2PersDictLE = new QLineEdit(persDictCtrlBox);
+QPushButton *add2PersDict = new QPushButton(persDictCtrlBox);
+add2PersDict->setText(lbls["add"]);
+persDictCtrlBoxL->addWidget(persDictCtrlSpace,0,0,1,2,Qt::AlignTop | Qt::AlignHCenter);
+persDictCtrlBoxL->addWidget(add2PersDictLE,1,0,1,1,Qt::AlignTop | Qt::AlignHCenter);
+persDictCtrlBoxL->addWidget(add2PersDict,1,1,1,1,Qt::AlignTop | Qt::AlignRight);
+
+persDictCtrlBox->setLayout(persDictCtrlBoxL);
+
+
+mnGrd->addWidget(rndBox,0,0,1,1,Qt::AlignTop | Qt::AlignLeft);
+
+	if(pDbExists){
+	mnGrd->addWidget(persDictBox,0,1,3,1,Qt::AlignTop | Qt::AlignRight);
+	mnGrd->addWidget(persDictCtrlBox,1,0,1,1,Qt::AlignTop | Qt::AlignJustify);
+	}
+	else{
+	QWidget *wideSp=new QWidget(this);
+	wideSp->setMinimumWidth(390);
+	mnGrd->addWidget(wideSp,0,1,1,1,Qt::AlignTop | Qt::AlignRight);
+	}
+
+this->setLayout(mnGrd);
 }
 
 
@@ -1320,6 +1388,7 @@ app.setApplicationName("mae-moedict");
 //asset path
 assetpath=confpath();
 dictDb="db/mae-moedict.db";
+pdictDb="db/personal.db";
 //assetpath="/scratchbox/users/sleepingkirby/home/sleepingkirby/dev/mae-moedict/assets/";
     if(assetpath==""){
     QTextEdit *te=new QTextEdit();
