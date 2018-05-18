@@ -11,6 +11,7 @@ public:
 	sqlitedb(QString dbfname);
 	sqlitedb();
 	QString query(QString qstr);
+	bool exec(QString qstr);
 	QString next();
 	void clear();
 	void close();	
