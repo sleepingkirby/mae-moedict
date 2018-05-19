@@ -94,10 +94,13 @@ public:
 
 	QString qlist2Html(QList<QString> qlist);
 
+	QString pList2Html();
+	
 	QComboBox *cbzy1;
         QComboBox *cbzy2;
         QComboBox *cbzy3;
         QComboBox *cbzya;
+	QComboBox *dict;
 	loadLbl *llbl;
 	
 	QLineEdit *qle;
@@ -114,6 +117,8 @@ public slots:
         void sgnRadRun();
         void sgnFreeRun();
 	void sgnEngRun();
+	void sgnRnd();
+	void sgnAddPDict();
 };
 
 
@@ -124,6 +129,5 @@ public slots:
 	void sgnHideShow(QString str);
 
 };
-
 
 

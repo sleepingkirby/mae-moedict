@@ -192,7 +192,7 @@ static const uint qt_meta_data_clickTB[] = {
        6,       // revision
        0,       // classname
        0,    0, // classinfo
-       5,   14, // methods
+       7,   14, // methods
        0,    0, // properties
        0,    0, // enums/sets
        0,    0, // constructors
@@ -207,13 +207,16 @@ static const uint qt_meta_data_clickTB[] = {
       28,    8,    8,    8, 0x0a,
       40,    8,    8,    8, 0x0a,
       53,    8,    8,    8, 0x0a,
+      65,    8,    8,    8, 0x0a,
+      74,    8,    8,    8, 0x0a,
 
        0        // eod
 };
 
 static const char qt_meta_stringdata_clickTB[] = {
     "clickTB\0\0clicked()\0sgnRun()\0sgnRadRun()\0"
-    "sgnFreeRun()\0sgnEngRun()\0"
+    "sgnFreeRun()\0sgnEngRun()\0sgnRnd()\0"
+    "sgnAddPDict()\0"
 };
 
 void clickTB::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
@@ -227,6 +230,8 @@ void clickTB::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, voi
         case 2: _t->sgnRadRun(); break;
         case 3: _t->sgnFreeRun(); break;
         case 4: _t->sgnEngRun(); break;
+        case 5: _t->sgnRnd(); break;
+        case 6: _t->sgnAddPDict(); break;
         default: ;
         }
     }
@@ -265,9 +270,9 @@ int clickTB::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     if (_id < 0)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {
-        if (_id < 5)
+        if (_id < 7)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 5;
+        _id -= 7;
     }
     return _id;
 }

@@ -26,6 +26,8 @@ QString assetpath;
 QString dictDb;
 QString pdictDb;
 
+bool pDbExists;	//bool check to make sure personal db exists.
+
 //global zhuyin arrays
 QList<QString> zy1;
 QList<QString> zy2;
@@ -45,6 +47,7 @@ QHash<QString, int> rad2num;
 //holding QList for personal list and random word holder
 QHash<int,QString> rnd;
 QHash<QString,int> pList; //personal word list
+
 
 //Max number of char
 int charMax;
@@ -293,6 +296,134 @@ delete(db);
 return rtrn;
 }
 
+
+/*------------------------
+pre: dictionaries existing, custom sql class
+post: none
+generates a word id from it's respective dicitionary
+returns 0 if error
+-------------------------*/
+QHash<int,QString> rndWord(QString dict){
+QHash<int,QString> rtrn;
+rtrn[0]="";
+	if(dict.isEmpty()){
+	return rtrn;
+	}
+
+	if(dict=="personal"){
+		if(pList.count()>0){
+		//get random word from personal dictionary
+		//get all keys from pList
+		QList<QString> keys=pList.keys();
+		//find min and max from keys
+		int pListMax=keys.count(); //min is 0
+		// generate random number between min and max
+		qsrand(QDateTime::currentDateTime().toTime_t());
+		int rndid=(qrand()%(pListMax));
+		rtrn.remove(0);
+		rtrn[pList[keys[rndid]]]=keys[rndid];
+		}
+	//return that word
+	return rtrn;
+	}
+	else if(dict=="all"){
+	qsrand(QDateTime::currentDateTime().toTime_t());
+	//assume min is 1, max is global charMax
+	// random between those two numbers
+	int rndid=(qrand()%(charMax))+1;
+	rtrn.remove(0);
+	rtrn[rndid]=getWord(rndid);
+	return rtrn;
+	}
+return rtrn;
+}
+
+/*-------------------------
+pre:
+post:
+checks to make sure that the personal dictionary exists
+-------------------------*/
+bool chckPersDict(){
+return ifexists(assetpath + pdictDb);
+}
+
+/*---------------------------
+pre: custom SQL Lib
+post: pList is populated;
+load all list
+select c.id as id, c.char as char, h.pinyin as pinyin, h.zhuyin as zhuyin, d.e as edef from char as c left join hold as h on c.id=h.char_id left join def as d on h.id=d.hold_id where c.id=
+----------------------------*/
+QHash<QString,int> loadPDict(){
+QString sqlq="select char, id from personal";
+
+sqlitedb *pdb=new sqlitedb(assetpath + pdictDb);
+pdb->query(sqlq);
+        while(pdb->result.isValid()){
+        pList[pdb->result.value(0).toString()]=pdb->result.value(1).toInt();
+        pdb->next();
+        }
+
+pdb->close();
+delete(pdb);
+return pList;
+}
+
+/*--------------------------
+pre: this class, custom sql class/lib
+post: pList is modified (potentially) and database modified (potentiall)
+takes input word and (after some sanity checks) inserts it into the database and pList.
+---------------------------*/
+bool add2PList(QString word){
+        //if word is empty or database doesn't exist, do nothing
+        if(word.isEmpty()||!pDbExists){
+        return false;
+        }
+
+        //word already in personal dictionary. do ntohing.
+        if(pList.contains(word)){
+        return false;
+        }
+        //make sure word being entered does exist in the dictionary
+        int id=getWordId(word);
+        if(id>0){
+        sqlitedb *db=new sqlitedb(assetpath + pdictDb);
+        db->exec("insert into personal (id, datetime, char) values("+QString::number(id)+",CURRENT_TIMESTAMP, \""+word+"\")");
+        db->close();
+        delete(db);
+        pList[word]=id;
+        return true;
+        }
+return false;
+}
+
+
+/*--------------------------
+pre: this class, custom sql class/lib
+post: pList is modified (potentially) and database modified (potentiall)
+takes input word and (after some sanity checks) inserts it into the database and pList.
+---------------------------*/
+bool delFrmPList(QString word){
+        //if word is empty or database doesn't exist, do nothing
+        if(word.isEmpty()||!pDbExists){
+        return false;
+        }
+
+        //if word not in dictionary, do nothing
+        if(!pList.contains(word)){
+        return false;
+        }
+        //make sure word being entered does exist in the dictionary*
+        int id=getWordId(word);
+        if(id>0){
+        sqlitedb *db=new sqlitedb(assetpath + pdictDb);
+        db->exec("delete from personal where id="+QString::number(id));
+        db->close();
+        delete(db);
+        pList.remove(word);
+        return true;
+        }
+return false;
+}
 
 
 /*-----------------------------------------------------
@@ -700,6 +831,39 @@ void clickTB::sgnRun(){
 this->setHtml(db2Str(sqlStr()));
 llbl->setClear();
 }
+
+//signal to get and fill random word
+void clickTB::sgnRnd(){
+QHash<int,QString> word=rndWord(dict->itemData(dict->currentIndex()).toString());
+QString rtrn="<a href=\"" + QString::number(word.begin().key()) + "\"><span>" + word.begin().value() + "</span></a> ";
+rtrn="<html><head><style>" + readCSS() + "</style></head><body>" + rtrn + "</body></html>";
+qle->setText(word.begin().value());
+this->setHtml(rtrn);
+}
+
+//add to pList AND database (run lrnTB::add2PList(QString word) and then reload this clickTB
+void clickTB::sgnAddPDict(){
+add2PList(qle->text());//add to pList and db
+//render pList
+
+}
+
+
+
+/*-------------------------
+pre: pList existing. lrnTb existing
+post: lrnTb->myList 
+takes pList (a QHash<QString,int>) and makes html out of it so it can be used for setHtml
+-------------------------*/
+QString clickTB::pList2Html(){
+QString rtrn="";
+rtrn="<a href=\"" + QString::number(word.begin().key()) + "\"><span>" + word.begin().value() + "</span></a> <a href=\"delete:" + QString::number(word.begin().key()) + "\"><span>[Delete]</span></a>";
+
+
+rtrn="<html><head><style>" + readCSS() + "</style></head><body>" + rtrn + "</body></html>";
+
+}
+
 
 QString clickTB::db2Str(QString sqlstr){
 sqlitedb *db=new sqlitedb(assetpath + dictDb);
@@ -1202,146 +1366,13 @@ learning tabl
 --------------------------*/
 class lrnTb : public QWidget{
 public:
-	bool pDbExists;	//bool check to make sure personal db exists.
 	void setup();
-	bool chckPersDict();
-	QHash<QString,int> loadPDict();
-	bool add2PList(QString word);
-	bool delFrmPList(QString word);
-	QHash<int, QString> rndWord(QString dict); //generates a random word id from a dictionary
+
+public slots:
+	void sgnRnd(); //generate random word from button press
+	void sgnWrdAdd(); //add word from input
+	void sgnDelWrd(QUrl url);
 };
-
-
-/*------------------------
-pre: dictionaries existing, custom sql class
-post: none
-generates a word id from it's respective dicitionary
-returns 0 if error
--------------------------*/
-QHash<int,QString> lrnTb::rndWord(QString dict){
-QHash<int,QString> rtrn;
-rtrn[0]="";
-	if(dict.isEmpty()){
-	return rtrn;
-	}
-
-	if(dict=="personal"){
-		if(pList.count()>0){
-		//get random word from personal dictionary
-		//get all keys from pList
-		QList<QString> keys=pList.keys();
-		//find min and max from keys
-		int pListMax=keys.count(); //min is 0
-		// generate random number between min and max
-		qsrand(QDateTime::currentDateTime().toTime_t());
-		int rndid=(qrand()%(pListMax));
-		rtrn.remove(0);
-		rtrn[pList[keys[rndid]]]=keys[rndid];
-		}
-	//return that word
-	return rtrn;
-	}
-	else if(dict=="all"){
-	qsrand(QDateTime::currentDateTime().toTime_t());
-	//assume min is 1, max is global charMax
-	// random between those two numbers
-	int rndid=(qrand()%(charMax))+1;
-	rtrn.remove(0);
-	rtrn[rndid]=getWord(rndid);
-	return rtrn;
-	}
-return rtrn;
-}
-
-/*--------------------------
-pre: this class, custom sql class/lib
-post: pList is modified (potentially) and database modified (potentiall)
-takes input word and (after some sanity checks) inserts it into the database and pList.
----------------------------*/
-bool lrnTb::add2PList(QString word){
-	//if word is empty or database doesn't exist, do nothing
-	if(word.isEmpty()||!pDbExists){
-	return false;
-	}	
-	
-	//word already in personal dictionary. do ntohing.
-	if(pList.contains(word)){
-	return false;
-	}
-	//make sure word being entered does exist in the dictionary
-	int id=getWordId(word);
-	if(id>0){
-	sqlitedb *db=new sqlitedb(assetpath + pdictDb);
-	db->exec("insert into personal (id, datetime, char) values("+QString::number(id)+",CURRENT_TIMESTAMP, \""+word+"\")");
-	db->close();
-	delete(db);
-	pList[word]=id;
-	return true;
-	}
-return false;
-}
-
-/*--------------------------
-pre: this class, custom sql class/lib
-post: pList is modified (potentially) and database modified (potentiall)
-takes input word and (after some sanity checks) inserts it into the database and pList.
----------------------------*/
-bool lrnTb::delFrmPList(QString word){
-	//if word is empty or database doesn't exist, do nothing
-	if(word.isEmpty()||!pDbExists){
-	return false;
-	}	
-	
-	//if word not in dictionary, do nothing
-	if(!pList.contains(word)){
-	return false;
-	}
-	//make sure word being entered does exist in the dictionary*
-	int id=getWordId(word);
-	if(id>0){
-	sqlitedb *db=new sqlitedb(assetpath + pdictDb);
-	db->exec("delete from personal where id="+QString::number(id));
-	db->close();
-	delete(db);
-	pList.remove(word);
-	return true;
-	}
-return false;
-}
-
-
-
-
-/*---------------------------
-pre: custom SQL Lib
-post: pList is populated;
-load all list
-select c.id as id, c.char as char, h.pinyin as pinyin, h.zhuyin as zhuyin, d.e as edef from char as c left join hold as h on c.id=h.char_id left join def as d on h.id=d.hold_id where c.id=
-----------------------------*/
-QHash<QString,int> lrnTb::loadPDict(){
-QString sqlq="select char, id from personal"; 
-
-sqlitedb *pdb=new sqlitedb(assetpath + pdictDb);
-pdb->query(sqlq);
-        while(pdb->result.isValid()){
-        pList[pdb->result.value(0).toString()]=pdb->result.value(1).toInt();
-        pdb->next();
-        }
-
-pdb->close();
-delete(pdb);
-return pList;
-}
-
-/*-------------------------
-pre:
-post:
-checks to make sure that the personal dictionary exists
--------------------------*/
-bool lrnTb::chckPersDict(){
-return ifexists(assetpath + pdictDb);
-}
-
 
 /*-----------------------------------------------------
  * pre:
@@ -1353,16 +1384,16 @@ void lrnTb::setup(){
 QGridLayout *mnGrd=new QGridLayout(this);
 mnGrd->setAlignment(Qt::AlignHCenter);
 
-pDbExists=this->chckPersDict();
+pDbExists=chckPersDict();
 
 if(pDbExists){
 loadPDict();
 }
 
 QComboBox *wDB=new QComboBox(this);
-wDB->addItem(lbls["all"]+lbls["dict"],0);
+wDB->insertItem(0,lbls["all"]+lbls["dict"],"all");
 	if(pDbExists){
-	wDB->addItem(lbls["pers"]+lbls["dict"],1);
+	wDB->insertItem(1,lbls["pers"]+lbls["dict"],"personal");
 	}
 
 //ComboBox for which dictionary
@@ -1372,8 +1403,8 @@ clickTB *rndChar = new clickTB(40,40,200,70);
 
 clickTB *myList=new clickTB(40,40,370,470);
 
-QPushButton *pbSubmit = new QPushButton(this);
-pbSubmit->setText(lbls["search"]);
+QPushButton *rndSubmit = new QPushButton(this);
+rndSubmit->setText(lbls["search"]);
 
 
 //GroupBox Random
@@ -1384,10 +1415,11 @@ rndBox->setAlignment(Qt::AlignLeft);
 QWidget *spacer=new QWidget(this);
 spacer->setMinimumHeight(3);
 
+
 rndBoxL->addWidget(spacer,0,0,1,3,Qt::AlignVCenter | Qt::AlignHCenter);
 rndBoxL->addWidget(rndChar,1,0,2,1,Qt::AlignVCenter | Qt::AlignHCenter);
 rndBoxL->addWidget(wDB,1,2,1,1,Qt::AlignVCenter | Qt::AlignRight);
-rndBoxL->addWidget(pbSubmit,2,2,1,1,Qt::AlignVCenter | Qt::AlignRight);
+rndBoxL->addWidget(rndSubmit,2,2,1,1,Qt::AlignVCenter | Qt::AlignRight);
 rndBox->setLayout(rndBoxL);
 
 QWidget *vspacer=new QWidget(this);
@@ -1436,7 +1468,12 @@ mnGrd->addWidget(rndBox,0,0,1,1,Qt::AlignTop | Qt::AlignLeft);
 
 //QHash<int,QString> rtrn=this->rndWord("personal");
 //qWarning() << "key: " << QString::number(rtrn.begin().key()) << ", word: " << rtrn.begin().value() <<endl;
-
+rndChar->dict=wDB; //set rndChar's instance of QComboBox with this object's 
+//QComboBox of which dictionary selected. Because signal -> slot needs the instance to call it
+rndChar->qle=add2PersDictLE;
+QObject::connect(rndSubmit, SIGNAL(pressed()), rndChar, SLOT(sgnRnd()));
+QObject::connect(rndChar, SIGNAL(linkClicked(QUrl)), dp, SLOT(sgnRun(QUrl)));
+QObject::connect(add2PersDict, SIGNAL(pressed()), myList, SLOT(sgnAddPDict());
 
 this->setLayout(mnGrd);
 }
