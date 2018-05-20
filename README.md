@@ -1,7 +1,7 @@
 Traditional Chinese Dicitonary/臺灣正體辭典
 https://github.com/sleepingkirby/mae-moedict
 
-*NOTE: Current compile is for devuan/debian/ubuntu.*
+*NOTE: Current compile is for devuan/debian/ubuntu with additional compiles for maemo and windows*
 
 
 my first QT application. Made for nokia n900. Also works in linux (tested with Devuan/Debian) Works with qt4.8 only. Requires SQLite and QT4.
