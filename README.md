@@ -71,6 +71,9 @@ Added a basic .sql file so that any updated/new .db from "moedict2sqlite" can ha
 UPDATE 2017/12/13
 Changed the "num" column in the table "hold" to text from string. This prevents the truncation of the num that has any leading zero's. This allows for download of all audio files.
 
+UPDATE 2018/05/20
+Major update. Included a new learning (學習) tab which includes a randon word function as well as a personal word list db management. Can select from random word from personal or all dictionary. Also changed so that, on the desktop OS's (windows, devuan/debian), when clicking on a new word while the word definition page is up in the background, that page will load the new definition and be brought to the foreground.
+
 Known Issues: 
 - Due to vfat and the 36000+ ogg files, you can't load it all the files into the same directory. If audio is a must, one of the following must happen:
   1) device a tree directory structure to hold all the audio files.
