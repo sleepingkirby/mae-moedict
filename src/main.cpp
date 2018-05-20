@@ -857,7 +857,7 @@ this->setHtml(pList2Html());
 //add to pList AND database (run lrnTB::add2PList(QString word) and then reload this clickTB
 void clickTB::sgnDelPDict(QUrl url){
 bool isInt=false;
-int charid=url.toString().toInt(&isInt, 10);
+url.toString().toInt(&isInt, 10);
 	if(!isInt){
 	//this is to check if the url has "d:" in front of it as that's a hack to determine an action from just the QUrl
 	QString urlstr=url.toString();
@@ -1440,7 +1440,7 @@ rndBox->setMinimumWidth(390);
 QGridLayout *rndBoxL=new QGridLayout(rndBox);
 rndBox->setAlignment(Qt::AlignLeft);
 QWidget *spacer=new QWidget(this);
-spacer->setMinimumHeight(3);
+spacer->setMinimumHeight(12);
 
 
 rndBoxL->addWidget(spacer,0,0,1,3,Qt::AlignVCenter | Qt::AlignHCenter);
@@ -1450,7 +1450,7 @@ rndBoxL->addWidget(rndSubmit,2,2,1,1,Qt::AlignVCenter | Qt::AlignRight);
 rndBox->setLayout(rndBoxL);
 
 QWidget *vspacer=new QWidget(this);
-vspacer->setMinimumHeight(3);
+vspacer->setMinimumHeight(12);
 
 //GroupBox Personal Dictionary
 QGroupBox *persDictBox=new QGroupBox(lbls["pers"]+lbls["dict"]);
@@ -1466,10 +1466,11 @@ persDictCtrlBox->setMinimumHeight(330);
 
 QGridLayout *persDictCtrlBoxL=new QGridLayout(persDictCtrlBox);
 QWidget *persDictCtrlSpace=new QWidget(persDictCtrlBox);
-persDictCtrlSpace->setMinimumHeight(3);
+persDictCtrlSpace->setMinimumHeight(12);
 QWidget *persDictCtrlVSpace=new QWidget(this);
 persDictCtrlVSpace->setMinimumHeight(260);
 QLineEdit *add2PersDictLE = new QLineEdit(persDictCtrlBox);
+add2PersDictLE->setMinimumSize(200,50);
 QPushButton *add2PersDict = new QPushButton(persDictCtrlBox);
 add2PersDict->setText(lbls["add"]);
 persDictCtrlBoxL->addWidget(persDictCtrlSpace,0,0,1,2,Qt::AlignTop | Qt::AlignHCenter);
