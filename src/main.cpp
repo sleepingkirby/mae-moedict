@@ -383,6 +383,7 @@ bool add2PList(QString word){
         if(pList.contains(word)){
         return false;
         }
+
         //make sure word being entered does exist in the dictionary
         int id=getWordId(word);
         if(id>0){
@@ -689,11 +690,16 @@ return "\n\t" + str;
 
 
 void defpage::sgnRun(QUrl url){
-int charid=url.toString().toInt();
-//emit loadDefSgn(charid); a fix to try to generate a searching dialog when a link is clicked that failed. as even chained signals don't get drawn/ran until all the actions are done.
-this->setup(charid);
-this->show();
-this->activateWindow();
+bool isInt=false;
+int charid=url.toString().toInt(&isInt, 10);
+	if(isInt){
+	//emit loadDefSgn(charid); a fix to try to generate a searching dialog when a link is clicked that failed. as even chained signals don't get drawn/ran until all the actions are done.
+	this->setup(charid);
+	this->show();
+	this->activateWindow();
+	}
+	else{ 
+	}
 }
 
 //not being used anymore
@@ -845,7 +851,22 @@ this->setHtml(rtrn);
 void clickTB::sgnAddPDict(){
 add2PList(qle->text());//add to pList and db
 //render pList
+this->setHtml(pList2Html());
+}
 
+//add to pList AND database (run lrnTB::add2PList(QString word) and then reload this clickTB
+void clickTB::sgnDelPDict(QUrl url){
+bool isInt=false;
+int charid=url.toString().toInt(&isInt, 10);
+	if(!isInt){
+	//this is to check if the url has "d:" in front of it as that's a hack to determine an action from just the QUrl
+	QString urlstr=url.toString();
+		if(urlstr[0]=='d' && urlstr[1]==':'){
+		urlstr.remove(0,2);
+		delFrmPList(urlstr);
+		this->setHtml(pList2Html());
+		}
+	}
 }
 
 
@@ -857,11 +878,17 @@ takes pList (a QHash<QString,int>) and makes html out of it so it can be used fo
 -------------------------*/
 QString clickTB::pList2Html(){
 QString rtrn="";
-rtrn="<a href=\"" + QString::number(word.begin().key()) + "\"><span>" + word.begin().value() + "</span></a> <a href=\"delete:" + QString::number(word.begin().key()) + "\"><span>[Delete]</span></a>";
+QList<QString> keys=pList.keys();
+int pMax=keys.count();
+int i=0;
 
+	while(i<pMax){
+	rtrn+="<a href=\"" + QString::number(pList[keys[i]]) + "\"><span>" + keys[i] + "</span></a> <a href=\"d:" + keys[i] + "\"><span>[Delete]</span></a><br>";
+	i++;
+	}
 
 rtrn="<html><head><style>" + readCSS() + "</style></head><body>" + rtrn + "</body></html>";
-
+return rtrn;
 }
 
 
@@ -1386,10 +1413,6 @@ mnGrd->setAlignment(Qt::AlignHCenter);
 
 pDbExists=chckPersDict();
 
-if(pDbExists){
-loadPDict();
-}
-
 QComboBox *wDB=new QComboBox(this);
 wDB->insertItem(0,lbls["all"]+lbls["dict"],"all");
 	if(pDbExists){
@@ -1402,6 +1425,10 @@ wDB->insertItem(0,lbls["all"]+lbls["dict"],"all");
 clickTB *rndChar = new clickTB(40,40,200,70);
 
 clickTB *myList=new clickTB(40,40,370,470);
+	if(pDbExists){
+	loadPDict();
+	myList->setHtml(myList->pList2Html());
+	}
 
 QPushButton *rndSubmit = new QPushButton(this);
 rndSubmit->setText(lbls["search"]);
@@ -1471,9 +1498,12 @@ mnGrd->addWidget(rndBox,0,0,1,1,Qt::AlignTop | Qt::AlignLeft);
 rndChar->dict=wDB; //set rndChar's instance of QComboBox with this object's 
 //QComboBox of which dictionary selected. Because signal -> slot needs the instance to call it
 rndChar->qle=add2PersDictLE;
+myList->qle=add2PersDictLE;
 QObject::connect(rndSubmit, SIGNAL(pressed()), rndChar, SLOT(sgnRnd()));
 QObject::connect(rndChar, SIGNAL(linkClicked(QUrl)), dp, SLOT(sgnRun(QUrl)));
-QObject::connect(add2PersDict, SIGNAL(pressed()), myList, SLOT(sgnAddPDict());
+QObject::connect(add2PersDict, SIGNAL(pressed()), myList, SLOT(sgnAddPDict()));
+QObject::connect(myList, SIGNAL(linkClicked(QUrl)), dp, SLOT(sgnRun(QUrl)));
+QObject::connect(myList, SIGNAL(linkClicked(QUrl)), myList, SLOT(sgnDelPDict(QUrl)));
 
 this->setLayout(mnGrd);
 }
@@ -1628,7 +1658,7 @@ loadlbls();
 //get max char id number
 getMax();
 
-QString about= "<html><head><style>" + readCSS() + "</style></head><body id=\"about\"><div>Compiled: 2017-09-30<br><a href=\"https://github.com/sleepingkirby/mae-moedict\">https://github.com/sleepingkirby/mae-moedict</a><br><br>If you find this program useful, please consider donation: <br>" + lbls["ifuseful"]+ " <br><br>Patreon: <a href=\"https://www.patreon.com/wklaume\">https://www.patreon.com/wklaume</a></div><div>PayPal: <a href=\"https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=3EE2P5RCJ6V9S\">https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=3EE2P5RCJ6V9S</a></div><br><br>All suggestions/bug reports are welcome. <br>" + lbls["bugsugg"] + "</body></html>";
+QString about= "<html><head><style>" + readCSS() + "</style></head><body id=\"about\"><div>Compiled: 2018-05-20<br><a href=\"https://github.com/sleepingkirby/mae-moedict\">https://github.com/sleepingkirby/mae-moedict</a><br><br>If you find this program useful, please consider donation: <br>" + lbls["ifuseful"]+ " <br><br>Patreon: <a href=\"https://www.patreon.com/wklaume\">https://www.patreon.com/wklaume</a></div><div>PayPal: <a href=\"https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=3EE2P5RCJ6V9S\">https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=3EE2P5RCJ6V9S</a></div><br><br>All suggestions/bug reports are welcome. <br>" + lbls["bugsugg"] + "</body></html>";
 
 
 //tab headers

@@ -119,6 +119,7 @@ public slots:
 	void sgnEngRun();
 	void sgnRnd();
 	void sgnAddPDict();
+	void sgnDelPDict(QUrl url);
 };
 
 

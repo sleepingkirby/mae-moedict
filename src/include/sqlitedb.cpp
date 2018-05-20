@@ -74,7 +74,6 @@ return rtrn;
 bool sqlitedb::exec(QString qstr){
 
 QSqlQuery execsql;
-qWarning() << qstr <<endl;
 bool rtrn=execsql.exec(qstr);
 execsql.clear();
 execsql.finish();
