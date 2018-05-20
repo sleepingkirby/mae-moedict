@@ -9,6 +9,7 @@
 #include <QDialog>
 #include <QMouseEvent>
 #include <QLineEdit>
+#include <QScrollArea>
 
 QString readCSS();
 QString readFile(QString path);
@@ -77,6 +78,8 @@ Q_OBJECT
 public:
 	clickTB(QComboBox *cb1, QComboBox *cb2, QComboBox *cb3, QComboBox *cb4, loadLbl *ldlbl); //to get value of comboboxes
 	clickTB(QLineEdit *lineedit, loadLbl *ldlbl); //to get value of comboboxes
+	clickTB(); //to get value of comboboxes
+	clickTB(int minw, int minh, int maxw, int maxh); //to get value of comboboxes
 	QString sqlStr();
 	QString db2Str(QString sqlstr);
 
@@ -89,10 +92,15 @@ public:
 	QString engSqlStr();
 	QString engDb2Str(QString sqlstr);
 
+	QString qlist2Html(QList<QString> qlist);
+
+	QString pList2Html();
+	
 	QComboBox *cbzy1;
         QComboBox *cbzy2;
         QComboBox *cbzy3;
         QComboBox *cbzya;
+	QComboBox *dict;
 	loadLbl *llbl;
 	
 	QLineEdit *qle;
@@ -109,6 +117,9 @@ public slots:
         void sgnRadRun();
         void sgnFreeRun();
 	void sgnEngRun();
+	void sgnRnd();
+	void sgnAddPDict();
+	void sgnDelPDict(QUrl url);
 };
 
 
@@ -119,6 +130,5 @@ public slots:
 	void sgnHideShow(QString str);
 
 };
-
 
 

@@ -1,7 +1,7 @@
 /****************************************************************************
 ** Meta object code from reading C++ file 'main.h'
 **
-** Created: Mon Sep 11 22:10:28 2017
+** Created: Sat May 19 22:41:31 2018
 **      by: The Qt Meta Object Compiler version 62 (Qt 4.7.0)
 **
 ** WARNING! All changes made in this file will be lost!
@@ -165,7 +165,7 @@ static const uint qt_meta_data_clickTB[] = {
        5,       // revision
        0,       // classname
        0,    0, // classinfo
-       5,   14, // methods
+       8,   14, // methods
        0,    0, // properties
        0,    0, // enums/sets
        0,    0, // constructors
@@ -180,13 +180,17 @@ static const uint qt_meta_data_clickTB[] = {
       28,    8,    8,    8, 0x0a,
       40,    8,    8,    8, 0x0a,
       53,    8,    8,    8, 0x0a,
+      65,    8,    8,    8, 0x0a,
+      74,    8,    8,    8, 0x0a,
+      92,   88,    8,    8, 0x0a,
 
        0        // eod
 };
 
 static const char qt_meta_stringdata_clickTB[] = {
     "clickTB\0\0clicked()\0sgnRun()\0sgnRadRun()\0"
-    "sgnFreeRun()\0sgnEngRun()\0"
+    "sgnFreeRun()\0sgnEngRun()\0sgnRnd()\0"
+    "sgnAddPDict()\0url\0sgnDelPDict(QUrl)\0"
 };
 
 const QMetaObject clickTB::staticMetaObject = {
@@ -223,9 +227,12 @@ int clickTB::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
         case 2: sgnRadRun(); break;
         case 3: sgnFreeRun(); break;
         case 4: sgnEngRun(); break;
+        case 5: sgnRnd(); break;
+        case 6: sgnAddPDict(); break;
+        case 7: sgnDelPDict((*reinterpret_cast< QUrl(*)>(_a[1]))); break;
         default: ;
         }
-        _id -= 5;
+        _id -= 8;
     }
     return _id;
 }

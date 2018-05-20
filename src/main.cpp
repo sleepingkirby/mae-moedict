@@ -14,11 +14,19 @@
 #include <QLineEdit>
 #include <QWebFrame>
 #include <QKeyEvent>
+#include <QCheckBox>
 #include <QDir>
+#include <QGroupBox>
+#include <QDateTime>
 #include "./main.h"
 
 //asset folder path
 QString assetpath;
+
+QString dictDb;
+QString pdictDb;
+
+bool pDbExists;	//bool check to make sure personal db exists.
 
 //global zhuyin arrays
 QList<QString> zy1;
@@ -36,6 +44,14 @@ QList<QString> rad;
 QList<int> radstrk;
 QHash<QString, int> rad2num;
 
+//holding QList for personal list and random word holder
+QHash<int,QString> rnd;
+QHash<QString,int> pList; //personal word list
+
+
+//Max number of char
+int charMax;
+
 //global defpage
 defpage *dp;
 
@@ -43,13 +59,14 @@ defpage *dp;
 void loadRad2Num(){
 QString sqlq="select char,id from radical order by id";
 
-sqlitedb *db=new sqlitedb(assetpath + "db/mae-moedict.db");
+sqlitedb *db=new sqlitedb(assetpath + dictDb);
 db->query(sqlq);
         while(db->result.isValid()){
 	rad2num[db->result.value(0).toString()]=db->result.value(1).toInt();
         db->next();
 	}
 db->close();
+delete(db);
 }
 
 
@@ -57,58 +74,60 @@ db->close();
 void loadNum2Zy(){
 QString sqlq="select id,char from zhuyin order by id";
 
-sqlitedb *db=new sqlitedb(assetpath + "db/mae-moedict.db");
+sqlitedb *db=new sqlitedb(assetpath + dictDb);
 db->query(sqlq);
         while(db->result.isValid()){
 	num2zy[db->result.value(0).toInt()]=db->result.value(1).toString();
         db->next();
 	}
 db->close();
+delete(db);
 }
 
 void loadNum2Zya(){
 QString sqlq="select id, char from zhuyinTone order by id";
 
-sqlitedb *db=new sqlitedb(assetpath + "db/mae-moedict.db");
+sqlitedb *db=new sqlitedb(assetpath + dictDb);
 db->query(sqlq);
         while(db->result.isValid()){
 	num2zya[db->result.value(0).toInt()]=db->result.value(1).toString();
         db->next();
 	}
 db->close();
+delete(db);
 }
 
 void loadZy2Num(){
 QString sqlq="select char, id from zhuyin order by id";
 
-sqlitedb *db=new sqlitedb(assetpath + "db/mae-moedict.db");
+sqlitedb *db=new sqlitedb(assetpath + dictDb);
 db->query(sqlq);
         while(db->result.isValid()){
 	zy2num[db->result.value(0).toString()]=db->result.value(1).toInt();
         db->next();
 	}
 db->close();
+delete(db);
 }
 
 void loadZya2Num(){
 QString sqlq="select char, id from zhuyinTone order by id";
 
-sqlitedb *db=new sqlitedb(assetpath + "db/mae-moedict.db");
+sqlitedb *db=new sqlitedb(assetpath + dictDb);
 db->query(sqlq);
         while(db->result.isValid()){
 	zya2num[db->result.value(0).toString()]=db->result.value(1).toInt();
         db->next();
 	}
 db->close();
+delete(db);
 }
 
 void list2Combo(QList<QString> &ls, QComboBox *cb){
 int cbi=cb->count();
 int i=1;
 int size=ls.count();
-//qDebug() << "---------------------------";
 	while(i<size){
-//	qDebug() << i << ": " << ls[i];
 	cb->insertItem(cbi,ls[i],i);
 	cbi++;
 	i++;
@@ -119,9 +138,7 @@ void list2ComboRad(QList<QString> &ls, QList<int> &lsi, QComboBox *cb){
 int cbi=cb->count();
 int i=1;
 int size=ls.count();
-//qDebug() << "---------------------------";
 	while(i<size){
-//	qDebug() << "ls["<< i << "]: " << ls[i] << ", "<< lsi[i];
 	cb->insertItem(cbi, "[" + QString::number(lsi[i]) + "] " + ls[i],i);
 	cbi++;
 	i++;
@@ -146,7 +163,7 @@ zy1.append(""); //using these space out the zero index
 zy2.append("");
 zy3.append("");
 zya.append("");
-sqlitedb *db=new sqlitedb(assetpath + "db/mae-moedict.db");
+sqlitedb *db=new sqlitedb(assetpath + dictDb);
 db->query("select char from zhuyin order by id");
         while(db->result.isValid()){
                 if(i>=zyn1[0]&&i<=zyn1[1]){
@@ -168,6 +185,7 @@ db->query("select char from zhuyinTone order by id");
         db->next();
         }
 db->close();
+delete(db);
 }
 
 
@@ -175,7 +193,7 @@ void loadRad(){
 int i=1;
 rad.append("");//qlists have to have an index zero or it'll crash. 
 radstrk.append(0);//qlists have to have an index zero or it'll crash. 
-sqlitedb *db=new sqlitedb(assetpath + "db/mae-moedict.db");
+sqlitedb *db=new sqlitedb(assetpath + dictDb);
 db->query("select char,stroke from radical order by id");
         while(db->result.isValid()){
         rad.insert(i,db->result.value(0).toString());
@@ -186,6 +204,7 @@ db->query("select char,stroke from radical order by id");
         }
 
 db->close();
+delete(db);
 }
 
 bool ifexists(QString path){
@@ -239,6 +258,174 @@ QFileInfo check_file(oggpath);
 	}
 return ahtml;
 }
+
+/*------------------------
+pre: db lib and database existing
+post: none
+gets the id of the word. if word doesn't exist, returns 0
+------------------------*/
+int getWordId(QString word){
+	if(word.isEmpty()){
+	return 0;
+	}
+int rtrn=0;
+
+sqlitedb *db=new sqlitedb(assetpath + dictDb);
+db->query("select id from char where char=\""+word+"\"");
+        rtrn=db->result.value(0).toInt();
+db->close();
+delete(db);
+return rtrn;
+}
+
+/*------------------------
+pre: db lib and database existing
+post: none
+gets the id of the word. if word doesn't exist, returns 0
+------------------------*/
+QString getWord(int id){
+QString rtrn="";
+	if(id<=0 || id>charMax){
+	return rtrn;
+	}
+sqlitedb *db=new sqlitedb(assetpath + dictDb);
+db->query("select char from char where id="+QString::number(id));
+        rtrn=db->result.value(0).toString();
+db->close();
+delete(db);
+return rtrn;
+}
+
+
+/*------------------------
+pre: dictionaries existing, custom sql class
+post: none
+generates a word id from it's respective dicitionary
+returns 0 if error
+-------------------------*/
+QHash<int,QString> rndWord(QString dict){
+QHash<int,QString> rtrn;
+rtrn[0]="";
+	if(dict.isEmpty()){
+	return rtrn;
+	}
+
+	if(dict=="personal"){
+		if(pList.count()>0){
+		//get random word from personal dictionary
+		//get all keys from pList
+		QList<QString> keys=pList.keys();
+		//find min and max from keys
+		int pListMax=keys.count(); //min is 0
+		// generate random number between min and max
+		qsrand(QDateTime::currentDateTime().toTime_t());
+		int rndid=(qrand()%(pListMax));
+		rtrn.remove(0);
+		rtrn[pList[keys[rndid]]]=keys[rndid];
+		}
+	//return that word
+	return rtrn;
+	}
+	else if(dict=="all"){
+	qsrand(QDateTime::currentDateTime().toTime_t());
+	//assume min is 1, max is global charMax
+	// random between those two numbers
+	int rndid=(qrand()%(charMax))+1;
+	rtrn.remove(0);
+	rtrn[rndid]=getWord(rndid);
+	return rtrn;
+	}
+return rtrn;
+}
+
+/*-------------------------
+pre:
+post:
+checks to make sure that the personal dictionary exists
+-------------------------*/
+bool chckPersDict(){
+return ifexists(assetpath + pdictDb);
+}
+
+/*---------------------------
+pre: custom SQL Lib
+post: pList is populated;
+load all list
+select c.id as id, c.char as char, h.pinyin as pinyin, h.zhuyin as zhuyin, d.e as edef from char as c left join hold as h on c.id=h.char_id left join def as d on h.id=d.hold_id where c.id=
+----------------------------*/
+QHash<QString,int> loadPDict(){
+QString sqlq="select char, id from personal";
+
+sqlitedb *pdb=new sqlitedb(assetpath + pdictDb);
+pdb->query(sqlq);
+        while(pdb->result.isValid()){
+        pList[pdb->result.value(0).toString()]=pdb->result.value(1).toInt();
+        pdb->next();
+        }
+
+pdb->close();
+delete(pdb);
+return pList;
+}
+
+/*--------------------------
+pre: this class, custom sql class/lib
+post: pList is modified (potentially) and database modified (potentiall)
+takes input word and (after some sanity checks) inserts it into the database and pList.
+---------------------------*/
+bool add2PList(QString word){
+        //if word is empty or database doesn't exist, do nothing
+        if(word.isEmpty()||!pDbExists){
+        return false;
+        }
+
+        //word already in personal dictionary. do ntohing.
+        if(pList.contains(word)){
+        return false;
+        }
+
+        //make sure word being entered does exist in the dictionary
+        int id=getWordId(word);
+        if(id>0){
+        sqlitedb *db=new sqlitedb(assetpath + pdictDb);
+        db->exec("insert into personal (id, datetime, char) values("+QString::number(id)+",CURRENT_TIMESTAMP, \""+word+"\")");
+        db->close();
+        delete(db);
+        pList[word]=id;
+        return true;
+        }
+return false;
+}
+
+
+/*--------------------------
+pre: this class, custom sql class/lib
+post: pList is modified (potentially) and database modified (potentiall)
+takes input word and (after some sanity checks) inserts it into the database and pList.
+---------------------------*/
+bool delFrmPList(QString word){
+        //if word is empty or database doesn't exist, do nothing
+        if(word.isEmpty()||!pDbExists){
+        return false;
+        }
+
+        //if word not in dictionary, do nothing
+        if(!pList.contains(word)){
+        return false;
+        }
+        //make sure word being entered does exist in the dictionary*
+        int id=getWordId(word);
+        if(id>0){
+        sqlitedb *db=new sqlitedb(assetpath + pdictDb);
+        db->exec("delete from personal where id="+QString::number(id));
+        db->close();
+        delete(db);
+        pList.remove(word);
+        return true;
+        }
+return false;
+}
+
 
 /*-----------------------------------------------------
  * pre:
@@ -332,7 +519,7 @@ return rtrn;
 void defpage::setup(int charid){
 
 	this->setWindowTitle(QString::number(charid));
-	sqlitedb *db=new sqlitedb(assetpath + "db/mae-moedict.db");
+	sqlitedb *db=new sqlitedb(assetpath + dictDb);
 	QString q="select id,char,unum,rad_id,strokes,strk_rad from char where id=" + QString::number(charid);
 	//qDebug() << q;
 	db->query(q);
@@ -503,10 +690,16 @@ return "\n\t" + str;
 
 
 void defpage::sgnRun(QUrl url){
-int charid=url.toString().toInt();
-//emit loadDefSgn(charid); a fix to try to generate a searching dialog when a link is clicked that failed. as even chained signals don't get drawn/ran until all the actions are done.
-this->setup(charid);
-this->show();
+bool isInt=false;
+int charid=url.toString().toInt(&isInt, 10);
+	if(isInt){
+	//emit loadDefSgn(charid); a fix to try to generate a searching dialog when a link is clicked that failed. as even chained signals don't get drawn/ran until all the actions are done.
+	this->setup(charid);
+	this->show();
+	this->activateWindow();
+	}
+	else{ 
+	}
 }
 
 //not being used anymore
@@ -627,13 +820,80 @@ llbl=ldlbl;
 qle=lineedit;	
 }
 
+
+//allows to set a width and height
+//for learn tab
+clickTB::clickTB(int minw,int minh, int maxw, int maxh){
+//this->setOpenLinks(false);
+this->setMinimumSize(minw,minh);
+this->setMaximumSize(maxw,maxh);
+this->page()->currentFrame()->setScrollBarPolicy(Qt::Vertical,Qt::ScrollBarAsNeeded);
+this->page()->setLinkDelegationPolicy(QWebPage::DelegateAllLinks);
+}
+
+
+
 void clickTB::sgnRun(){
 this->setHtml(db2Str(sqlStr()));
 llbl->setClear();
 }
 
+//signal to get and fill random word
+void clickTB::sgnRnd(){
+QHash<int,QString> word=rndWord(dict->itemData(dict->currentIndex()).toString());
+QString rtrn="<a href=\"" + QString::number(word.begin().key()) + "\"><span>" + word.begin().value() + "</span></a> ";
+rtrn="<html><head><style>" + readCSS() + "</style></head><body>" + rtrn + "</body></html>";
+qle->setText(word.begin().value());
+this->setHtml(rtrn);
+}
+
+//add to pList AND database (run lrnTB::add2PList(QString word) and then reload this clickTB
+void clickTB::sgnAddPDict(){
+add2PList(qle->text());//add to pList and db
+//render pList
+this->setHtml(pList2Html());
+}
+
+//add to pList AND database (run lrnTB::add2PList(QString word) and then reload this clickTB
+void clickTB::sgnDelPDict(QUrl url){
+bool isInt=false;
+url.toString().toInt(&isInt, 10);
+	if(!isInt){
+	//this is to check if the url has "d:" in front of it as that's a hack to determine an action from just the QUrl
+	QString urlstr=url.toString();
+		if(urlstr[0]=='d' && urlstr[1]==':'){
+		urlstr.remove(0,2);
+		delFrmPList(urlstr);
+		this->setHtml(pList2Html());
+		}
+	}
+}
+
+
+
+/*-------------------------
+pre: pList existing. lrnTb existing
+post: lrnTb->myList 
+takes pList (a QHash<QString,int>) and makes html out of it so it can be used for setHtml
+-------------------------*/
+QString clickTB::pList2Html(){
+QString rtrn="";
+QList<QString> keys=pList.keys();
+int pMax=keys.count();
+int i=0;
+
+	while(i<pMax){
+	rtrn+="<a href=\"" + QString::number(pList[keys[i]]) + "\"><span>" + keys[i] + "</span></a> <a href=\"d:" + keys[i] + "\"><span>[Delete]</span></a><br>";
+	i++;
+	}
+
+rtrn="<html><head><style>" + readCSS() + "</style></head><body>" + rtrn + "</body></html>";
+return rtrn;
+}
+
+
 QString clickTB::db2Str(QString sqlstr){
-sqlitedb *db=new sqlitedb(assetpath + "db/mae-moedict.db");
+sqlitedb *db=new sqlitedb(assetpath + dictDb);
 db->query(sqlstr);
 QString rtrn="";
 QString curzy="";
@@ -818,7 +1078,7 @@ llbl->setClear();
 }
 
 QString clickTB::radDb2Str(QString sqlstr){
-sqlitedb *db=new sqlitedb(assetpath + "db/mae-moedict.db");
+sqlitedb *db=new sqlitedb(assetpath + dictDb);
 db->query(sqlstr);
 //select id, char, rad_id, strokes, strk_rad from char where strokes=1 order by strokes
 //select id, char, rad_id, strokes, strk_rad from char where strokes>1 and strokes<1 order by strokes
@@ -930,7 +1190,7 @@ return sqlq;
 }
 
 QString clickTB::freeDb2Str(QString sqlstr){
-sqlitedb *db=new sqlitedb(assetpath + "db/mae-moedict.db");
+sqlitedb *db=new sqlitedb(assetpath + dictDb);
 db->query(sqlstr);
 QString rtrn="";
 QString head="";
@@ -952,7 +1212,7 @@ return sqlq;
 }
 
 QString clickTB::engDb2Str(QString sqlstr){
-sqlitedb *db=new sqlitedb(assetpath + "db/mae-moedict.db");
+sqlitedb *db=new sqlitedb(assetpath + dictDb);
 db->query(sqlstr);
 QString rtrn="";
 QString head="";
@@ -1126,6 +1386,137 @@ this->setLayout(zyg);
 }
 
 
+/*-------------------------
+pre:
+post:
+learning tabl
+--------------------------*/
+class lrnTb : public QWidget{
+public:
+	void setup();
+
+public slots:
+	void sgnRnd(); //generate random word from button press
+	void sgnWrdAdd(); //add word from input
+	void sgnDelWrd(QUrl url);
+};
+
+/*-----------------------------------------------------
+ * pre:
+ * post:
+ * populates the widget of thiis class with the things
+ * it needs. 
+------------------------------------------------------*/
+void lrnTb::setup(){
+QGridLayout *mnGrd=new QGridLayout(this);
+mnGrd->setAlignment(Qt::AlignHCenter);
+
+pDbExists=chckPersDict();
+
+QComboBox *wDB=new QComboBox(this);
+wDB->insertItem(0,lbls["all"]+lbls["dict"],"all");
+	if(pDbExists){
+	wDB->insertItem(1,lbls["pers"]+lbls["dict"],"personal");
+	}
+
+//ComboBox for which dictionary
+//rnd.append("<a class=\"rnd\" href=\"#\">"+lbls["rand"]+"</a>");
+//pList.append("list1");
+clickTB *rndChar = new clickTB(40,40,200,70);
+
+clickTB *myList=new clickTB(40,40,370,470);
+	if(pDbExists){
+	loadPDict();
+	myList->setHtml(myList->pList2Html());
+	}
+
+QPushButton *rndSubmit = new QPushButton(this);
+rndSubmit->setText(lbls["search"]);
+
+
+//GroupBox Random
+QGroupBox *rndBox=new QGroupBox(lbls["rand"]);
+rndBox->setMinimumWidth(390);
+QGridLayout *rndBoxL=new QGridLayout(rndBox);
+rndBox->setAlignment(Qt::AlignLeft);
+QWidget *spacer=new QWidget(this);
+spacer->setMinimumHeight(12);
+
+
+rndBoxL->addWidget(spacer,0,0,1,3,Qt::AlignVCenter | Qt::AlignHCenter);
+rndBoxL->addWidget(rndChar,1,0,2,1,Qt::AlignVCenter | Qt::AlignHCenter);
+rndBoxL->addWidget(wDB,1,2,1,1,Qt::AlignVCenter | Qt::AlignRight);
+rndBoxL->addWidget(rndSubmit,2,2,1,1,Qt::AlignVCenter | Qt::AlignRight);
+rndBox->setLayout(rndBoxL);
+
+QWidget *vspacer=new QWidget(this);
+vspacer->setMinimumHeight(12);
+
+//GroupBox Personal Dictionary
+QGroupBox *persDictBox=new QGroupBox(lbls["pers"]+lbls["dict"]);
+QGridLayout *persDictL=new QGridLayout(persDictBox);
+persDictL->addWidget(vspacer,0,0,1,1,Qt::AlignVCenter | Qt::AlignHCenter);
+persDictL->addWidget(myList,1,0,1,1,Qt::AlignVCenter | Qt::AlignHCenter);
+persDictBox->setLayout(persDictL);
+
+//controls for the personal
+QGroupBox *persDictCtrlBox=new QGroupBox(lbls["pers"]+lbls["dict"]);
+persDictCtrlBox->setMinimumWidth(390);
+persDictCtrlBox->setMinimumHeight(330);
+
+QGridLayout *persDictCtrlBoxL=new QGridLayout(persDictCtrlBox);
+QWidget *persDictCtrlSpace=new QWidget(persDictCtrlBox);
+persDictCtrlSpace->setMinimumHeight(12);
+QWidget *persDictCtrlVSpace=new QWidget(this);
+persDictCtrlVSpace->setMinimumHeight(260);
+QLineEdit *add2PersDictLE = new QLineEdit(persDictCtrlBox);
+add2PersDictLE->setMinimumSize(200,50);
+QPushButton *add2PersDict = new QPushButton(persDictCtrlBox);
+add2PersDict->setText(lbls["add"]);
+persDictCtrlBoxL->addWidget(persDictCtrlSpace,0,0,1,2,Qt::AlignTop | Qt::AlignHCenter);
+persDictCtrlBoxL->addWidget(add2PersDictLE,1,0,1,1,Qt::AlignTop | Qt::AlignHCenter);
+persDictCtrlBoxL->addWidget(add2PersDict,1,1,1,1,Qt::AlignTop | Qt::AlignRight);
+persDictCtrlBoxL->addWidget(persDictCtrlVSpace,2,0,2,2,Qt::AlignTop | Qt::AlignHCenter);
+
+
+persDictCtrlBox->setLayout(persDictCtrlBoxL);
+
+
+mnGrd->addWidget(rndBox,0,0,1,1,Qt::AlignTop | Qt::AlignLeft);
+
+	if(pDbExists){
+	mnGrd->addWidget(persDictBox,0,1,2,1,Qt::AlignTop | Qt::AlignRight);
+	mnGrd->addWidget(persDictCtrlBox,1,0,1,1,Qt::AlignTop | Qt::AlignJustify);
+	}
+	else{
+	QWidget *wideSp=new QWidget(this);
+	wideSp->setMinimumWidth(390);
+	mnGrd->addWidget(wideSp,0,1,1,1,Qt::AlignTop | Qt::AlignRight);
+	}
+
+//QHash<int,QString> rtrn=this->rndWord("personal");
+//qWarning() << "key: " << QString::number(rtrn.begin().key()) << ", word: " << rtrn.begin().value() <<endl;
+rndChar->dict=wDB; //set rndChar's instance of QComboBox with this object's 
+//QComboBox of which dictionary selected. Because signal -> slot needs the instance to call it
+rndChar->qle=add2PersDictLE;
+myList->qle=add2PersDictLE;
+QObject::connect(rndSubmit, SIGNAL(pressed()), rndChar, SLOT(sgnRnd()));
+QObject::connect(rndChar, SIGNAL(linkClicked(QUrl)), dp, SLOT(sgnRun(QUrl)));
+QObject::connect(add2PersDict, SIGNAL(pressed()), myList, SLOT(sgnAddPDict()));
+QObject::connect(myList, SIGNAL(linkClicked(QUrl)), dp, SLOT(sgnRun(QUrl)));
+QObject::connect(myList, SIGNAL(linkClicked(QUrl)), myList, SLOT(sgnDelPDict(QUrl)));
+
+this->setLayout(mnGrd);
+}
+
+
+
+
+/*-----------------------------------------
+pre: Qt functions
+post: none 
+tries to determine the path of the assets folder across all the different OS's
+-------------------------------------------*/
 QString confpath(){
 QString confDirNm="/.mae-moedict";
 QString assets="/assets/";
@@ -1176,11 +1567,15 @@ QString exists="";
 return "";
 }
 
-
+/*---------------------------
+pre: custom sqldb class previous written
+post: program global lbls populated
+populates the lbls with lbls in the DB as the windows version can't handle UTF text very well if it's written in the source code files
+----------------------------*/
 void loadlbls(){
 QString sqlq="select eng,chn from lbls";
 
-sqlitedb *db=new sqlitedb(assetpath + "db/mae-moedict.db");
+sqlitedb *db=new sqlitedb(assetpath + dictDb);
 db->query(sqlq);
         while(db->result.isValid()){
         lbls[db->result.value(0).toString()]=db->result.value(1).toString();
@@ -1189,6 +1584,23 @@ db->query(sqlq);
 db->close();
 }
 
+/*-----------------------------------------------------
+pre: the sqldb class and the database existing
+post: the max filled
+gets the last character 
+-----------------------------------------------------*/
+void getMax(){
+QString sqlq="select id from char order by id desc limit 1";
+
+sqlitedb *db=new sqlitedb(assetpath + dictDb);
+db->query(sqlq);
+        while(db->result.isValid()){
+        charMax=db->result.value(0).toInt();
+        db->next();
+        }
+db->close();
+
+}
 
 /*-----------------------------------------------------
  * pre:
@@ -1202,6 +1614,8 @@ QApplication app (argc, argv);
 app.setApplicationName("mae-moedict");
 //asset path
 assetpath=confpath();
+dictDb="db/mae-moedict.db";
+pdictDb="db/personal.db";
 //assetpath="/scratchbox/users/sleepingkirby/home/sleepingkirby/dev/mae-moedict/assets/";
     if(assetpath==""){
     QTextEdit *te=new QTextEdit();
@@ -1239,9 +1653,13 @@ QString msyh = QFontDatabase::applicationFontFamilies(fontId).at(0);
 QFont font(msyh,10);
 QApplication::setFont(font);
 
+//init load Labels
 loadlbls();
 
-QString about= "<html><head><style>" + readCSS() + "</style></head><body id=\"about\"><div>Compiled: 2017-09-30<br><a href=\"https://github.com/sleepingkirby/mae-moedict\">https://github.com/sleepingkirby/mae-moedict</a><br><br>If you find this program useful, please consider donation: <br>" + lbls["ifuseful"]+ " <br><br>Patreon: <a href=\"https://www.patreon.com/wklaume\">https://www.patreon.com/wklaume</a></div><div>PayPal: <a href=\"https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=3EE2P5RCJ6V9S\">https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=3EE2P5RCJ6V9S</a></div><br><br>All suggestions/bug reports are welcome. <br>" + lbls["bugsugg"] + "</body></html>";
+//get max char id number
+getMax();
+
+QString about= "<html><head><style>" + readCSS() + "</style></head><body id=\"about\"><div>Compiled: 2018-05-20<br><a href=\"https://github.com/sleepingkirby/mae-moedict\">https://github.com/sleepingkirby/mae-moedict</a><br><br>If you find this program useful, please consider donation: <br>" + lbls["ifuseful"]+ " <br><br>Patreon: <a href=\"https://www.patreon.com/wklaume\">https://www.patreon.com/wklaume</a></div><div>PayPal: <a href=\"https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=3EE2P5RCJ6V9S\">https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=3EE2P5RCJ6V9S</a></div><br><br>All suggestions/bug reports are welcome. <br>" + lbls["bugsugg"] + "</body></html>";
 
 
 //tab headers
@@ -1251,6 +1669,7 @@ QString tabrad=lbls["rad"];
 QString tabdb=lbls["free"];
 QString tabeng=lbls["eng"];
 QString tababt="About";
+QString tabLearn=lbls["learn"];
 
 //load global zhuyin
 loadZhuyin();
@@ -1264,6 +1683,7 @@ loadRad2Num();
 //init global defpage;
 dp=new defpage();
 //init load label
+
 
 QWidget *pWindow = new QWidget;
 pWindow->setWindowTitle("mae-moedict");
@@ -1295,10 +1715,15 @@ aboutTB->setMinimumSize(780,400);
 aboutGL->addWidget(aboutTB,0,0,Qt::AlignCenter);
 aboutw->setLayout(aboutGL);
 
+//learn tab (random and personal dicitonary
+lrnTb *lrn=new lrnTb();
+lrn->setup();
+
 maintw->addTab(zy_w, tabzhuyin);
 maintw->addTab(rdw, tabstroke + "/" + tabrad);
 maintw->addTab(frees, tabdb);
 maintw->addTab(eng, tabeng);
+maintw->addTab(lrn, tabLearn);
 maintw->addTab(aboutw, tababt);
 
 mainLayout->addWidget(maintw,0,0, Qt::AlignCenter);

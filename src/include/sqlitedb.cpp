@@ -48,8 +48,7 @@ QString cnnct=hnd.connectionName();
 hnd.close();
 hnd=QSqlDatabase();
 hnd.removeDatabase(cnnct);
-};
-
+}
 
 
 /*--------------------------------
@@ -65,6 +64,23 @@ rtrn+=result.value(0).toString();
 
 return rtrn;
 }
+
+
+
+/*--------------------------------
+ * pre:
+ * post:
+ * -----------------------------*/
+bool sqlitedb::exec(QString qstr){
+
+QSqlQuery execsql;
+bool rtrn=execsql.exec(qstr);
+execsql.clear();
+execsql.finish();
+return rtrn;
+}
+
+
 
 /*-----------------------------
  * pre:
