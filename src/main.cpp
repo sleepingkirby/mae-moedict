@@ -389,6 +389,8 @@ bool add2PList(QString word){
         return false;
         }
 
+	addWord=word;
+
         //word already in personal dictionary. do ntohing.
         if(pListOrd.contains(word)){
         return false;
@@ -404,7 +406,6 @@ bool add2PList(QString word){
         pListOrd[word]=id;
 	pListId.prepend(id);
 	pListChar.prepend(word);
-	addWord=word;
         return true;
         }
 return false;
@@ -426,6 +427,9 @@ bool delFrmPList(QString word){
         if(!pListOrd.contains(word)){
         return false;
         }
+
+	addWord=word;
+
         //make sure word being entered does exist in the dictionary*
         int id=getWordId(word);
         if(id>0){
@@ -437,7 +441,6 @@ bool delFrmPList(QString word){
         pListOrd.remove(word);
 	pListChar.removeAt(ord);
 	pListId.removeAt(ord);
-	addWord=word;
         return true;
         }
 return false;
@@ -1492,7 +1495,7 @@ QPushButton *add2PersDict = new QPushButton(persDictCtrlBox);
 add2PersDict->setText(lbls["add"]);
 ldlbl->setParent(persDictCtrlBox);
 
-persDictCtrlBoxL->addWidget(persDictCtrlSpace,0,0,1,2,Qt::AlignTop | Qt::AlignHCenter);
+persDictCtrlBoxL->addWidget(persDictCtrlSpace,0,0,1,2,Qt::AlignTop | Qt::AlignLeft);
 persDictCtrlBoxL->addWidget(add2PersDictLE,1,0,1,1,Qt::AlignTop | Qt::AlignHCenter);
 persDictCtrlBoxL->addWidget(add2PersDict,1,1,1,1,Qt::AlignTop | Qt::AlignRight);
 persDictCtrlBoxL->addWidget(ldlbl,2,0,1,1,Qt::AlignTop | Qt::AlignLeft);
