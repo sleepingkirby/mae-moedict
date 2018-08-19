@@ -1,0 +1,11 @@
+notes for windows compile for qt
+
+*make sure previous bulid compiles. If it doesn't you know it's the environment.*
+
+1) start the command prompt under Qt 5.6 5.6 msvc 2013 64 bit
+2) inthe command prompt, run "vcvarsall.bat amd64"
+(this is usually in C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\) amd64 is for when compiling for 64 bit
+3) cd into the source and run "nmake clean"
+4) then run "nmake"
+5) then run "nmake install"?
+
