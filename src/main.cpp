@@ -46,7 +46,11 @@ QHash<QString, int> rad2num;
 
 //holding QList for personal list and random word holder
 QHash<int,QString> rnd;
-QHash<QString,int> pList; //personal word list
+QHash<QString,int> pListOrd; //word -> order number
+QList<int> pListId; // order number -> word id
+QList<QString> pListChar; //order number -> word
+QString addWord;
+
 
 //Max number of char
 int charMax;
@@ -310,17 +314,15 @@ rtrn[0]="";
 	}
 
 	if(dict=="personal"){
-		if(pList.count()>0){
+		if(pListId.count()>0){
 		//get random word from personal dictionary
-		//get all keys from pList
-		QList<QString> keys=pList.keys();
 		//find min and max from keys
-		int pListMax=keys.count(); //min is 0
+		int pListMax=pListId.count(); //min is 0
 		// generate random number between min and max
 		qsrand(QDateTime::currentDateTime().toTime_t());
 		int rndid=(qrand()%(pListMax));
 		rtrn.remove(0);
-		rtrn[pList[keys[rndid]]]=keys[rndid];
+		rtrn[pListId[rndid]]=pListChar[rndid];// word id -> word
 		}
 	//return that word
 	return rtrn;
@@ -351,19 +353,29 @@ pre: custom SQL Lib
 post: pList is populated;
 load all list
 ----------------------------*/
-QHash<QString,int> loadPDict(){
+void loadPDict(){
 QString sqlq="select char, id from personal order by datetime desc";
 
 sqlitedb *pdb=new sqlitedb(assetpath + pdictDb);
 pdb->query(sqlq);
+pListId.clear();
+pListOrd.clear();
+pListChar.clear();
+int i=0;
+int id=0;
+QString word="";
         while(pdb->result.isValid()){
-        pList[pdb->result.value(0).toString()]=pdb->result.value(1).toInt();
+	id=pdb->result.value(1).toInt();
+	word=pdb->result.value(0).toString();
+        pListOrd[word]=i;
+        pListId.append(id);
+        pListChar.append(word);
+	i++;
         pdb->next();
         }
-
 pdb->close();
 delete(pdb);
-return pList;
+return;
 }
 
 /*--------------------------
@@ -378,7 +390,7 @@ bool add2PList(QString word){
         }
 
         //word already in personal dictionary. do ntohing.
-        if(pList.contains(word)){
+        if(pListOrd.contains(word)){
         return false;
         }
 
@@ -389,7 +401,10 @@ bool add2PList(QString word){
         db->exec("insert into personal (id, datetime, char) values("+QString::number(id)+",CURRENT_TIMESTAMP, \""+word+"\")");
         db->close();
         delete(db);
-        pList[word]=id;
+        pListOrd[word]=id;
+	pListId.prepend(id);
+	pListChar.prepend(word);
+	addWord=word;
         return true;
         }
 return false;
@@ -408,7 +423,7 @@ bool delFrmPList(QString word){
         }
 
         //if word not in dictionary, do nothing
-        if(!pList.contains(word)){
+        if(!pListOrd.contains(word)){
         return false;
         }
         //make sure word being entered does exist in the dictionary*
@@ -418,7 +433,11 @@ bool delFrmPList(QString word){
         db->exec("delete from personal where id="+QString::number(id));
         db->close();
         delete(db);
-        pList.remove(word);
+	int ord=pListOrd[word];
+        pListOrd.remove(word);
+	pListChar.removeAt(ord);
+	pListId.removeAt(ord);
+	addWord=word;
         return true;
         }
 return false;
@@ -580,7 +599,7 @@ void defpage::setup(int charid){
 	
 
 	QString inTxt="<html><head><style>@font-face{font-family: \"DroidSansFallbackFull\"; src url(\"file:" + assetpath + "DroidSansFallbackFull.ttf\");}" + cssStyle + "</style></head><body>";
-	inTxt += "<h1 id=\"char\">" + chr + "</h1>\n\n[" + rad[rad_id] + "] " + lbls["part"] + " + " + QString::number(strk_rad) + " = [" + QString::number(strokes) + "] " + lbls["hua"] + "\n\n";
+	inTxt += "<div id=\"char\">" + chr + "</div>\n\n[" + rad[rad_id] + "] " + lbls["part"] + " + " + QString::number(strk_rad) + " = [" + QString::number(strokes) + "] " + lbls["hua"] + "\n\n";
 	QString sep="<hr>\n";
 
 	//zhuyin, pinyin and definition.
@@ -841,7 +860,14 @@ this->setHtml(rtrn);
 
 //add to pList AND database (run lrnTB::add2PList(QString word) and then reload this clickTB
 void clickTB::sgnAddPDict(){
-	add2PList(qle->text());//add to pList and db
+	if(add2PList(qle->text())){
+	this->llbl->setText("[" +addWord + "] " + lbls["added"]);
+	}
+	else{
+	this->llbl->setText("[" +addWord + "] " + lbls["notAdded"]);
+	}
+//add to pList and db
+	loadPDict();
 //render pList
 this->setHtml(pList2Html());
 }
@@ -856,6 +882,8 @@ url.toString().toInt(&isInt, 10);
 		if(urlstr[0]=='d' && urlstr[1]==':'){
 		urlstr.remove(0,2);
 		delFrmPList(urlstr);
+		this->llbl->setText("[" + addWord + "] " + lbls["del"]);
+		loadPDict();
 		this->setHtml(pList2Html());
 		}
 	}
@@ -870,12 +898,12 @@ takes pList (a QHash<QString,int>) and makes html out of it so it can be used fo
 -------------------------*/
 QString clickTB::pList2Html(){
 QString rtrn="";
-QList<QString> keys=pList.keys();
-int pMax=keys.count();
+QList<QString> keys=pListOrd.keys();
+int pMax=pListId.count();
 int i=0;
 
 	while(i<pMax){
-	rtrn+="<a href=\"" + QString::number(pList[keys[i]]) + "\"><span>" + keys[i] + "</span></a> <a href=\"d:" + keys[i] + "\"><span>[Delete]</span></a><br>";
+	rtrn+="<a href=\"" + QString::number(pListId[i]) + "\"><span>" + pListChar[i] + "</span></a> <a href=\"d:" + pListChar[i] + "\"><span>[Delete]</span></a><br>";
 	i++;
 	}
 
@@ -891,13 +919,17 @@ QString rtrn="";
 QString curzy="";
 QString temp="";
 QString head="";
+QString top="";
         while(db->result.isValid()){
 		// select c.id, c.char, h.zy_1, h.zy_2, h.zy_3, h.accent, h.zhuyin from hold as h left join char as c on h.char_id=c.id
 		temp=num2zy[db->result.value(2).toInt()] + num2zy[db->result.value(3).toInt()] + num2zy[db->result.value(4).toInt()] + num2zya[db->result.value(5).toInt()];
 		//temp=db->result.value(2).toString() + " " + db->result.value(3).toString() + " " +db->result.value(4).toString() + " " +db->result.value(5).toString();
 		if(curzy!=temp){
 		curzy=temp;
-		head="[" + temp + "] ";
+		head=top + "[" + temp + "] ";
+                        if(top==""){
+                        top="<br>";
+                        }
 		}
 		else{
 		head="";
@@ -1401,16 +1433,15 @@ wDB->insertItem(0,lbls["all"]+lbls["dict"],"all");
 	}
 
 ldlbl=new loadLbl;//label to confirm adding of word
-
+ldlbl->setText("");
 
 //ComboBox for which dictionary
 //rnd.append("<a class=\"rnd\" href=\"#\">"+lbls["rand"]+"</a>");
 //pList.append("list1");
 clickTB *rndChar = new clickTB(40,40,200,70);
-rndChar->llbl=ldlbl;
 
 clickTB *myList=new clickTB(40,40,370,470);
-rndChar->llbl=ldlbl;
+myList->llbl=ldlbl;
 	if(pDbExists){
 	loadPDict();
 	myList->setHtml(myList->pList2Html());
