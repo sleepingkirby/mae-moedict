@@ -48,7 +48,6 @@ QHash<QString, int> rad2num;
 QHash<int,QString> rnd;
 QHash<QString,int> pList; //personal word list
 
-
 //Max number of char
 int charMax;
 
@@ -351,10 +350,9 @@ return ifexists(assetpath + pdictDb);
 pre: custom SQL Lib
 post: pList is populated;
 load all list
-select c.id as id, c.char as char, h.pinyin as pinyin, h.zhuyin as zhuyin, d.e as edef from char as c left join hold as h on c.id=h.char_id left join def as d on h.id=d.hold_id where c.id=
 ----------------------------*/
 QHash<QString,int> loadPDict(){
-QString sqlq="select char, id from personal";
+QString sqlq="select char, id from personal order by datetime desc";
 
 sqlitedb *pdb=new sqlitedb(assetpath + pdictDb);
 pdb->query(sqlq);
@@ -702,12 +700,6 @@ int charid=url.toString().toInt(&isInt, 10);
 	}
 }
 
-//not being used anymore
-void defpage::sgnLoadDef(int i){
-this->setup(i);
-this->show();
-}
-
 
 
 void defpage::keyPressEvent(QKeyEvent *e){
@@ -849,7 +841,7 @@ this->setHtml(rtrn);
 
 //add to pList AND database (run lrnTB::add2PList(QString word) and then reload this clickTB
 void clickTB::sgnAddPDict(){
-add2PList(qle->text());//add to pList and db
+	add2PList(qle->text());//add to pList and db
 //render pList
 this->setHtml(pList2Html());
 }
@@ -872,7 +864,7 @@ url.toString().toInt(&isInt, 10);
 
 
 /*-------------------------
-pre: pList existing. lrnTb existing
+pre: pList existing. pListNum existing, lrnTb existing
 post: lrnTb->myList 
 takes pList (a QHash<QString,int>) and makes html out of it so it can be used for setHtml
 -------------------------*/
@@ -1259,6 +1251,10 @@ this->setText("");
 void loadLbl::setClear(QUrl url){
 this->setText("");
 }
+void loadLbl::sgnAdded(){
+this->setText(lbls["added"]);
+}
+
 
 /*-----------------------------------------------------
  *pre:
@@ -1386,21 +1382,6 @@ this->setLayout(zyg);
 }
 
 
-/*-------------------------
-pre:
-post:
-learning tabl
---------------------------*/
-class lrnTb : public QWidget{
-public:
-	void setup();
-
-public slots:
-	void sgnRnd(); //generate random word from button press
-	void sgnWrdAdd(); //add word from input
-	void sgnDelWrd(QUrl url);
-};
-
 /*-----------------------------------------------------
  * pre:
  * post:
@@ -1419,12 +1400,17 @@ wDB->insertItem(0,lbls["all"]+lbls["dict"],"all");
 	wDB->insertItem(1,lbls["pers"]+lbls["dict"],"personal");
 	}
 
+ldlbl=new loadLbl;//label to confirm adding of word
+
+
 //ComboBox for which dictionary
 //rnd.append("<a class=\"rnd\" href=\"#\">"+lbls["rand"]+"</a>");
 //pList.append("list1");
 clickTB *rndChar = new clickTB(40,40,200,70);
+rndChar->llbl=ldlbl;
 
 clickTB *myList=new clickTB(40,40,370,470);
+rndChar->llbl=ldlbl;
 	if(pDbExists){
 	loadPDict();
 	myList->setHtml(myList->pList2Html());
@@ -1473,11 +1459,13 @@ QLineEdit *add2PersDictLE = new QLineEdit(persDictCtrlBox);
 add2PersDictLE->setMinimumSize(200,50);
 QPushButton *add2PersDict = new QPushButton(persDictCtrlBox);
 add2PersDict->setText(lbls["add"]);
+ldlbl->setParent(persDictCtrlBox);
+
 persDictCtrlBoxL->addWidget(persDictCtrlSpace,0,0,1,2,Qt::AlignTop | Qt::AlignHCenter);
 persDictCtrlBoxL->addWidget(add2PersDictLE,1,0,1,1,Qt::AlignTop | Qt::AlignHCenter);
 persDictCtrlBoxL->addWidget(add2PersDict,1,1,1,1,Qt::AlignTop | Qt::AlignRight);
-persDictCtrlBoxL->addWidget(persDictCtrlVSpace,2,0,2,2,Qt::AlignTop | Qt::AlignHCenter);
-
+persDictCtrlBoxL->addWidget(ldlbl,2,0,1,1,Qt::AlignTop | Qt::AlignLeft);
+persDictCtrlBoxL->addWidget(persDictCtrlVSpace,3,0,3,2,Qt::AlignTop | Qt::AlignHCenter);
 
 persDictCtrlBox->setLayout(persDictCtrlBoxL);
 
@@ -1508,7 +1496,6 @@ QObject::connect(myList, SIGNAL(linkClicked(QUrl)), myList, SLOT(sgnDelPDict(QUr
 
 this->setLayout(mnGrd);
 }
-
 
 
 

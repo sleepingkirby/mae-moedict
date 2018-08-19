@@ -25,6 +25,7 @@ public slots:
         void setLoad(QUrl url);
         void setClear();
 	void setClear(QUrl url);
+	void sgnAdded();
 };
 
 /*------------------------------------
@@ -64,7 +65,7 @@ signals:
 public slots:
 
 	void sgnRun(QUrl url);
-	void sgnLoadDef(int i);
+	//void sgnLoadDef(int i); not being used anymore
 	void keyPressEvent(QKeyEvent *e); //used for crtl-c
 
 };
@@ -131,4 +132,22 @@ public slots:
 
 };
 
+/*-------------------------
+pre:
+post:
+learning tabl
+--------------------------*/
+class lrnTb : public QWidget{
+Q_OBJECT
+
+public:
+	loadLbl *ldlbl;
+        void setup();
+/*
+public slots:
+        void sgnLdLbl(); //generate random word from button press
+        void sgnWrdAdd(); //add word from input
+        void sgnDelWrd(QUrl url);
+*/
+};
 
