@@ -74,6 +74,9 @@ Changed the "num" column in the table "hold" to text from string. This prevents 
 UPDATE 2018/05/20
 Major update. Included a new learning (學習) tab which includes a randon word function as well as a personal word list db management. Can select from random word from personal or all dictionary. Also changed so that, on the desktop OS's (windows, devuan/debian), when clicking on a new word while the word definition page is up in the background, that page will load the new definition and be brought to the foreground.
 
+UPDATE 2018/08/19
+Thought it had everything I need, turns out not. Made it so that the list in the learning tab is sorted from most recently added to oldest instead of arbitrary (which I thought with learning if the words are listed randomly, but it turns out that it just made it harder to manage). Also added messages stating if it had been added or removed. Also made it so that the 注音符號 results are newlined at the end of each permutation just like the stroke/radical tab. 
+
 Known Issues: 
 - Due to vfat and the 36000+ ogg files, you can't load it all the files into the same directory. If audio is a must, one of the following must happen:
   1) device a tree directory structure to hold all the audio files.
