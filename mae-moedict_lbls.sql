@@ -1,6 +1,5 @@
 PRAGMA foreign_keys=OFF;
 BEGIN TRANSACTION;
-DROP TABLE IF EXISTS lbls;
 CREATE TABLE lbls(id int primary key, eng text, chn text, lang text);
 INSERT INTO "lbls" VALUES(1,'zhuyin','注音','trad_chn');
 INSERT INTO "lbls" VALUES(2,'stroke','筆畫','trad_chn');
@@ -20,4 +19,7 @@ INSERT INTO "lbls" VALUES(15,'all','全部','trad_chn');
 INSERT INTO "lbls" VALUES(16,'pers','私人','trad_chn');
 INSERT INTO "lbls" VALUES(17,'dict','辭典','trad_chn');
 INSERT INTO "lbls" VALUES(18,'add','加','trad_chn');
+INSERT INTO "lbls" VALUES(19,'added','加入私人辭典成功','trad_chin');
+INSERT INTO "lbls" VALUES(20,'notAdded','加入失敗。可能已經加了。','trad_chin');
+INSERT INTO "lbls" VALUES(21,'del','從私人辭典刪除了。','trad_chin');
 COMMIT;
