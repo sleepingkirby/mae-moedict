@@ -9,3 +9,9 @@ notes for windows compile for qt
 4) then run "nmake"
 5) then run "nmake install"?
 
+Keep in mind that the linux and windows versions use different libraries and different codes.
+ - QWebView --> QWebEngineView
+ - clickTBP is a page that needs to be stored into a QWebEngineView
+ - All <a href needs to have a protocol or it'll fail. Having it set to "def:" Fail as in the page redirects to a blank, the emit override doesn't happen
+ - different code in general and functions
+

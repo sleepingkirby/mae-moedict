@@ -13,7 +13,6 @@
 #include <QFileInfo>
 #include <QLineEdit>
 #include <QKeyEvent>
-#include <QCheckBox>
 #include <QDir>
 #include <QGroupBox>
 #include <QDateTime>
@@ -25,7 +24,7 @@ QString assetpath;
 QString dictDb;
 QString pdictDb;
 
-bool pDbExists;	//bool check to make sure personal db exists.
+bool pDbExists; //bool check to make sure personal db exists.
 
 //global zhuyin arrays
 QList<QString> zy1;
@@ -36,6 +35,8 @@ QHash<QString,int> zy2num;
 QHash<QString,int> zya2num;
 QHash<int,QString> num2zy;
 QHash<int,QString> num2zya;
+
+//global tab/button labels (in chinese)
 QHash<QString,QString> lbls;
 
 //global rad array
@@ -43,16 +44,18 @@ QList<QString> rad;
 QList<int> radstrk;
 QHash<QString, int> rad2num;
 
-//holding QList for personal list and random word holder
+//global href because qt5.6's QWebEnginePage::acceptNavigationRequest needs a http: or anything def: in the front to work
+QString protocol="def:";
+
+//holding QList for personal list and random word holder  
 QHash<int,QString> rnd;
 QHash<QString,int> pListOrd; //word -> order number
-QList<int> pListId; // order number -> word id
+QList<int> pListId; // order number -> word id 
 QList<QString> pListChar; //order number -> word
-QString addWord;
-
+QString addWord;     
 
 //Max number of char
-int charMax;
+int charMax;      
 
 //global defpage
 defpage *dp;
@@ -64,9 +67,9 @@ QString sqlq="select char,id from radical order by id";
 sqlitedb *db=new sqlitedb(assetpath + dictDb);
 db->query(sqlq);
         while(db->result.isValid()){
-	rad2num[db->result.value(0).toString()]=db->result.value(1).toInt();
+    rad2num[db->result.value(0).toString()]=db->result.value(1).toInt();
         db->next();
-	}
+    }
 db->close();
 delete(db);
 }
@@ -79,9 +82,9 @@ QString sqlq="select id,char from zhuyin order by id";
 sqlitedb *db=new sqlitedb(assetpath + dictDb);
 db->query(sqlq);
         while(db->result.isValid()){
-	num2zy[db->result.value(0).toInt()]=db->result.value(1).toString();
+    num2zy[db->result.value(0).toInt()]=db->result.value(1).toString();
         db->next();
-	}
+    }
 db->close();
 delete(db);
 }
@@ -92,9 +95,9 @@ QString sqlq="select id, char from zhuyinTone order by id";
 sqlitedb *db=new sqlitedb(assetpath + dictDb);
 db->query(sqlq);
         while(db->result.isValid()){
-	num2zya[db->result.value(0).toInt()]=db->result.value(1).toString();
+    num2zya[db->result.value(0).toInt()]=db->result.value(1).toString();
         db->next();
-	}
+    }
 db->close();
 delete(db);
 }
@@ -105,9 +108,9 @@ QString sqlq="select char, id from zhuyin order by id";
 sqlitedb *db=new sqlitedb(assetpath + dictDb);
 db->query(sqlq);
         while(db->result.isValid()){
-	zy2num[db->result.value(0).toString()]=db->result.value(1).toInt();
+    zy2num[db->result.value(0).toString()]=db->result.value(1).toInt();
         db->next();
-	}
+    }
 db->close();
 delete(db);
 }
@@ -118,9 +121,9 @@ QString sqlq="select char, id from zhuyinTone order by id";
 sqlitedb *db=new sqlitedb(assetpath + dictDb);
 db->query(sqlq);
         while(db->result.isValid()){
-	zya2num[db->result.value(0).toString()]=db->result.value(1).toInt();
+    zya2num[db->result.value(0).toString()]=db->result.value(1).toInt();
         db->next();
-	}
+    }
 db->close();
 delete(db);
 }
@@ -129,22 +132,22 @@ void list2Combo(QList<QString> &ls, QComboBox *cb){
 int cbi=cb->count();
 int i=1;
 int size=ls.count();
-	while(i<size){
-	cb->insertItem(cbi,ls[i],i);
-	cbi++;
-	i++;
-	}
+    while(i<size){
+    cb->insertItem(cbi,ls[i],i);
+    cbi++;
+    i++;
+    }
 }
 
 void list2ComboRad(QList<QString> &ls, QList<int> &lsi, QComboBox *cb){
 int cbi=cb->count();
 int i=1;
 int size=ls.count();
-	while(i<size){
-	cb->insertItem(cbi, "[" + QString::number(lsi[i]) + "] " + ls[i],i);
-	cbi++;
-	i++;
-	}
+    while(i<size){
+    cb->insertItem(cbi, "[" + QString::number(lsi[i]) + "] " + ls[i],i);
+    cbi++;
+    i++;
+    }
 }
 
 void loadZhuyin(){
@@ -193,14 +196,14 @@ delete(db);
 
 void loadRad(){
 int i=1;
-rad.append("");//qlists have to have an index zero or it'll crash. 
-radstrk.append(0);//qlists have to have an index zero or it'll crash. 
+rad.append("");//qlists have to have an index zero or it'll crash.
+radstrk.append(0);//qlists have to have an index zero or it'll crash.
 sqlitedb *db=new sqlitedb(assetpath + dictDb);
 db->query("select char,stroke from radical order by id");
         while(db->result.isValid()){
         rad.insert(i,db->result.value(0).toString());
         radstrk.insert(i,db->result.value(1).toInt());
-	//qDebug() << "i) rad: "<<rad[i]<<", strk: "<<radstrk[i];
+    //qDebug() << "i) rad: "<<rad[i]<<", strk: "<<radstrk[i];
         i++;
         db->next();
         }
@@ -212,8 +215,8 @@ delete(db);
 bool ifexists(QString path){
 QFileInfo check_file(path);
         if(check_file.exists() && check_file.isFile()){
-	return true;
-	}
+    return true;
+    }
 return false;
 }
 
@@ -231,11 +234,11 @@ QString oggFileCheck(QString num){
 QString ahtml="";
 QString path=assetpath;
 QString redir=path+"voices/gohere.txt";
-	if(ifexists(redir)){
-	path=readFile(redir);
-	path=path.trimmed();
-	qDebug() << "voices folder redirect found: " + path;
-	}
+    if(ifexists(redir)){
+    path=readFile(redir);
+    path=path.trimmed();
+    qDebug() << "voices folder redirect found: " + path;
+    }
 
 
 QString testhtml=path+"voices/testhtml.txt";
@@ -250,16 +253,18 @@ QString testahtml="";
 QString oggnum=num.rightJustified(4,'0');
 QString oggpath=path + "voices/" + oggnum + ".ogg";
 QFileInfo check_file(oggpath);
-	if(check_file.exists() && check_file.isFile()){
-	ahtml="<audio controls><source src=\"file:" + oggpath + "\" type=\"audio/ogg\"></audio><br>cmdline: mplayer " + oggpath + "<br><br>"+testahtml;
-	qDebug() << "audio file found: " + oggpath + "\n" +ahtml;
-	}
-	else{
-	ahtml="<br>";
-	qDebug() << "audio file NOT found: " + oggpath;
-	}
+    if(check_file.exists() && check_file.isFile()){
+    ahtml="<audio controls><source src=\"file:" + oggpath + "\" type=\"audio/ogg\"></audio><br>cmdline: mplayer " + oggpath + "<br><br>"+testahtml;
+    qDebug() << "audio file found: " + oggpath + "\n" +ahtml;
+    }
+    else{
+    ahtml="<br>";
+    qDebug() << "audio file NOT found: " + oggpath;
+    }
 return ahtml;
 }
+
+
 
 /*------------------------
 pre: db lib and database existing
@@ -446,6 +451,7 @@ return false;
 }
 
 
+
 /*-----------------------------------------------------
  * pre:
  * post:
@@ -455,47 +461,47 @@ defpage::defpage(){
 /*
 CREATE TABLE char(id int primary key, char text, unum text, rad_id int, strokes int, strk_rad int);
 CREATE TABLE def(id int primkary key, hold_id int, type text, f text, e text, q text, s text, l text, a text);
-CREATE TABLE hold(id int primary key, num int, pinyin text, char_id int, zy_1 int, zy_2 int, zy_3 int, accent int, zhuyin text); 
+CREATE TABLE hold(id int primary key, num int, pinyin text, char_id int, zy_1 int, zy_2 int, zy_3 int, accent int, zhuyin text);
 CREATE TABLE translation(id int primary key, char_id int, lang text, def text);
 */
-	tblchar["id"]=0;
-	tblchar["char"]=1;
-	tblchar["unum"]=2;
-	tblchar["rad_id"]=3;
-	tblchar["strokes"]=4;
-	tblchar["strk_rad"]=5;
-	
-	tblhold["id"]=0;
-	tblhold["num"]=1;
-	tblhold["pinyin"]=2;
-	tblhold["char_id"]=3;
-	tblhold["zy_1"]=4;
-	tblhold["zy_2"]=5;
-	tblhold["zy_3"]=6;
-	tblhold["accent"]=7;
-	tblhold["zhuyin"]=8;
-	
-	tbldef["id"]=0;
-	tbldef["hold_id"]=1;
-	tbldef["type"]=2;
-	tbldef["def"]=3;
-	tbldef["example"]=4;
-	tbldef["quote"]=5;
-	tbldef["short"]=6;
-	tbldef["like"]=7;
-	tbldef["anto"]=8;
-	
-	tbltrans["id"]=0;
-	tbltrans["char_id"]=1;
-	tbltrans["lang"]=2;
-	tbltrans["def"]=3;
+    tblchar["id"]=0;
+    tblchar["char"]=1;
+    tblchar["unum"]=2;
+    tblchar["rad_id"]=3;
+    tblchar["strokes"]=4;
+    tblchar["strk_rad"]=5;
+
+    tblhold["id"]=0;
+    tblhold["num"]=1;
+    tblhold["pinyin"]=2;
+    tblhold["char_id"]=3;
+    tblhold["zy_1"]=4;
+    tblhold["zy_2"]=5;
+    tblhold["zy_3"]=6;
+    tblhold["accent"]=7;
+    tblhold["zhuyin"]=8;
+
+    tbldef["id"]=0;
+    tbldef["hold_id"]=1;
+    tbldef["type"]=2;
+    tbldef["def"]=3;
+    tbldef["example"]=4;
+    tbldef["quote"]=5;
+    tbldef["short"]=6;
+    tbldef["like"]=7;
+    tbldef["anto"]=8;
+
+    tbltrans["id"]=0;
+    tbltrans["char_id"]=1;
+    tbltrans["lang"]=2;
+    tbltrans["def"]=3;
         glayout = new QGridLayout(this);
         //deftxt = new QTextBrowser(this);
-        deftxt = new QWebView(this);
+        deftxt = new QWebEngineView(this);
 
         //deftxt->setTextInteractionFlags(Qt::TextSelectableByMouse | Qt::TextSelectableByKeyboard);
         //deftxt->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
-	deftxt->page()->currentFrame()->setScrollBarPolicy(Qt::Vertical,Qt::ScrollBarAlwaysOn);
+    //deftxt->page()->currentFrame()->setScrollBarPolicy(Qt::Vertical,Qt::ScrollBarAlwaysOn);
         deftxt->setMinimumSize(740, 380);
         //deftxt->setReadOnly(true);
 }
@@ -511,24 +517,24 @@ CREATE TABLE translation(id int primary key, char_id int, lang text, def text);
 ------------------------------------------------------*/
 QString defpage::trans2Str(sqlitedb *db){
 QString rtrn;
-	if(!db->result.isValid()){
-	qDebug() << db->result.lastError();
-	return rtrn;
-	}
+    if(!db->result.isValid()){
+    qDebug() << db->result.lastError();
+    return rtrn;
+    }
 
 QHash<QString, QString> trans;
-	while(db->result.isValid()){
-	trans[db->result.value(tbltrans["lang"]).toString()] += db->result.value(tbltrans["def"]).toString()+", ";
-	db->next();
-	}
+    while(db->result.isValid()){
+    trans[db->result.value(tbltrans["lang"]).toString()] += db->result.value(tbltrans["def"]).toString()+", ";
+    db->next();
+    }
 QList<QString> keys=trans.keys();
 int size=keys.size();
 int i=0;
-	while(i<size){
-	rtrn+=keys[i]+": "+trans[keys[i]]+"\n<br>";
-	i++;
-	}
-	
+    while(i<size){
+    rtrn+=keys[i]+": "+trans[keys[i]]+"\n<br>";
+    i++;
+    }
+
 return rtrn;
 }
 
@@ -537,67 +543,67 @@ return rtrn;
  * ---------------------------*/
 void defpage::setup(int charid){
 
-	this->setWindowTitle(QString::number(charid));
-	sqlitedb *db=new sqlitedb(assetpath + dictDb);
-	QString q="select id,char,unum,rad_id,strokes,strk_rad from char where id=" + QString::number(charid);
-	//qDebug() << q;
-	db->query(q);
+    this->setWindowTitle(QString::number(charid));
+    sqlitedb *db=new sqlitedb(assetpath + dictDb);
+    QString q="select id,char,unum,rad_id,strokes,strk_rad from char where id=" + QString::number(charid);
+    //qDebug() << q;
+    db->query(q);
 
-	//char table
-	QString chr=db->result.value(tblchar["char"]).toString();
-	QString unum=db->result.value(tblchar["unum"]).toString();
-	int rad_id=db->result.value(tblchar["rad_id"]).toInt();	
-	int strokes=db->result.value(tblchar["strokes"]).toInt();
-	int strk_rad=db->result.value(tblchar["strk_rad"]).toInt();	
+    //char table
+    QString chr=db->result.value(tblchar["char"]).toString();
+    QString unum=db->result.value(tblchar["unum"]).toString();
+    int rad_id=db->result.value(tblchar["rad_id"]).toInt();
+    int strokes=db->result.value(tblchar["strokes"]).toInt();
+    int strk_rad=db->result.value(tblchar["strk_rad"]).toInt();
 
-	//translation table
-	//CREATE TABLE translation(id int primary key, char_id int, lang text, def text);
-	q="select id,char_id, lang, def from translation where char_id=" + QString::number(charid);
-	db->query(q);
-	QString trans=trans2Str(db);
-	
+    //translation table
+    //CREATE TABLE translation(id int primary key, char_id int, lang text, def text);
+    q="select id,char_id, lang, def from translation where char_id=" + QString::number(charid);
+    db->query(q);
+    QString trans=trans2Str(db);
 
-	//hold table
-	//CREATE TABLE hold(id int primary key, num int, pinyin text, char_id int, zy_1 int, zy_2 int, zy_3 int, accent int, zhuyin text);
-	q="select h.id, z1.char, z2.char, z3.char, za.char, h.pinyin,h.num,h.zhuyin from hold as h left join zhuyin as z1 on h.zy_1=z1.id left join zhuyin as z2 on h.zy_2=z2.id left join zhuyin as z3 on h.zy_3=z3.id left join zhuyinTone as za on h.accent=za.id where h.char_id=" + QString::number(charid);
-	db->query(q);
-	QList<int> holdid;
-	QHash<int,QString> zhuyin;
-	QHash<int,QString> pinyin;
-	QHash<int,QString> oggnum;
-	QHash<int,QString> zhuyinstr;
-	int int_holdid;
-	while(db->result.isValid()){
-	int_holdid=db->result.value(0).toInt();
-	holdid.append(int_holdid);//hold_id
-	zhuyin[int_holdid]=db->result.value(1).toString(); 
-	zhuyin[int_holdid]+=db->result.value(2).toString(); 
-	zhuyin[int_holdid]+=db->result.value(3).toString(); 
-	zhuyin[int_holdid]+=db->result.value(4).toString(); 
-	pinyin[int_holdid]=db->result.value(5).toString();
-	oggnum[int_holdid]=db->result.value(6).toString();
-	zhuyinstr[int_holdid]=db->result.value(7).toString();
-	db->next();
-	}	
-	
-	//CREATE TABLE def(id int primkary key, hold_id int, type text, f text, e text, q text, s text, l text, a text);
-	//def table
-	QHash<int,QString> def;//indexed by holdid
-	int i=0;
-	int size=holdid.size();
-	while(i<size){
+
+    //hold table
+    //CREATE TABLE hold(id int primary key, num int, pinyin text, char_id int, zy_1 int, zy_2 int, zy_3 int, accent int, zhuyin text);
+    q="select h.id, z1.char, z2.char, z3.char, za.char, h.pinyin,h.num,h.zhuyin from hold as h left join zhuyin as z1 on h.zy_1=z1.id left join zhuyin as z2 on h.zy_2=z2.id left join zhuyin as z3 on h.zy_3=z3.id left join zhuyinTone as za on h.accent=za.id where h.char_id=" + QString::number(charid);
+    db->query(q);
+    QList<int> holdid;
+    QHash<int,QString> zhuyin;
+    QHash<int,QString> pinyin;
+    QHash<int,QString> oggnum;
+    QHash<int,QString> zhuyinstr;
+    int int_holdid;
+    while(db->result.isValid()){
+    int_holdid=db->result.value(0).toInt();
+    holdid.append(int_holdid);//hold_id
+    zhuyin[int_holdid]=db->result.value(1).toString();
+    zhuyin[int_holdid]+=db->result.value(2).toString();
+    zhuyin[int_holdid]+=db->result.value(3).toString();
+    zhuyin[int_holdid]+=db->result.value(4).toString();
+    pinyin[int_holdid]=db->result.value(5).toString();
+    oggnum[int_holdid]=db->result.value(6).toString();
+    zhuyinstr[int_holdid]=db->result.value(7).toString();
+    db->next();
+    }
+
+    //CREATE TABLE def(id int primkary key, hold_id int, type text, f text, e text, q text, s text, l text, a text);
+    //def table
+    QHash<int,QString> def;//indexed by holdid
+    int i=0;
+    int size=holdid.size();
+    while(i<size){
         q="select id,hold_id, type, f, e, q, s, l, a from def where hold_id=" + QString::number(holdid[i]);
-	db->query(q);
-	def[holdid[i]]+=def2Str(db);
-	i++;
-	}	
-	db->close();
+    db->query(q);
+    def[holdid[i]]+=def2Str(db);
+    i++;
+    }
+    db->close();
 
-	//gen/get css for webview
-	QString cssStyle=readCSS();
-	
-	//generate the text to show
-	// word, radical and stroke number
+    //gen/get css for webview
+    QString cssStyle=readCSS();
+
+    //generate the text to show
+    // word, radical and stroke number
 	
 
 	QString inTxt="<html><head><style>@font-face{font-family: \"DroidSansFallbackFull\"; src url(\"file:" + assetpath + "DroidSansFallbackFull.ttf\");}" + cssStyle + "</style></head><body>";
@@ -622,6 +628,7 @@ void defpage::setup(int charid){
 	deftxt->setHtml(inTxt);
 	glayout->addWidget(deftxt);
 	this->setLayout(glayout);
+
 }
 
 
@@ -629,7 +636,7 @@ void defpage::setup(int charid){
 /*-----------------------------------------------------
  * pre:
  * post:
- * takes the definition results (from "select * from def 
+ * takes the definition results (from "select * from def
  * where hold_id=<hold_id>") in the sqlitedb object
  * and returns a single formatted string
 ------------------------------------------------------*/
@@ -646,9 +653,9 @@ tbldef["like"]=7;
 tbldef["anto"]=8;
 */
 QString rtrn="";
-	if(!db->result.isValid()){
-	return rtrn;
-	}
+    if(!db->result.isValid()){
+    return rtrn;
+    }
 QHash<QString,QString> defs;
 QHash<QString,int> nums;
 QString type;
@@ -659,86 +666,92 @@ QString shrt;
 QString like;
 QString anto;
 QString defnum;
-	while(db->result.isValid()){
-	type=db->result.value(tbldef["type"]).toString();
-	def=db->result.value(tbldef["def"]).toString();
-	example=preBrTb(db->result.value(tbldef["example"]).toString());
-	quote=preBrTb(db->result.value(tbldef["quote"]).toString());
-	shrt=preBrTb(db->result.value(tbldef["short"]).toString());
-	like=preBrTb(db->result.value(tbldef["like"]).toString());
-	anto=preBrTb(db->result.value(tbldef["anto"]).toString());
-		if(def.size()>=1){
-		nums[type]++;
-		//defnum=QString::number(nums[type]) + ") " +def;
-		defnum="<li>" +def;
-		}
-		else{
-		defnum="";
-		}
-	defs[type]+=defnum + example + quote  + shrt  + like  + anto + "\n<br>\n<br>";
-	db->next();
-	}
+    while(db->result.isValid()){
+    type=db->result.value(tbldef["type"]).toString();
+    def=db->result.value(tbldef["def"]).toString();
+    example=preBrTb(db->result.value(tbldef["example"]).toString());
+    quote=preBrTb(db->result.value(tbldef["quote"]).toString());
+    shrt=preBrTb(db->result.value(tbldef["short"]).toString());
+    like=preBrTb(db->result.value(tbldef["like"]).toString());
+    anto=preBrTb(db->result.value(tbldef["anto"]).toString());
+        if(def.size()>=1){
+        nums[type]++;
+        //defnum=QString::number(nums[type]) + ") " +def;
+        defnum="<li>" +def;
+        }
+        else{
+        defnum="";
+        }
+    defs[type]+=defnum + example + quote  + shrt  + like  + anto + "\n<br>\n<br>";
+    db->next();
+    }
 QList<QString> keys=defs.keys();
 
 int i=0;
 int size=keys.size();
 QString typestr;
 QString typestrend;
-	while(i<size){
-		if(keys[i].size()>0){
-		typestr="["+keys[i]+"]\n<br><ol>";
-		typestrend="</ol>";
-		}
-		else{
-		typestr="<ol>";
-		typestrend="</ol>";
-		}
-	rtrn+=typestr+defs[keys[i]]+typestrend;
-	i++;
-	}
+    while(i<size){
+        if(keys[i].size()>0){
+        typestr="["+keys[i]+"]\n<br><ol>";
+        typestrend="</ol>";
+        }
+        else{
+        typestr="<ol>";
+        typestrend="</ol>";
+        }
+    rtrn+=typestr+defs[keys[i]]+typestrend;
+    i++;
+    }
 return rtrn;
 }
 
 QString defpage::preBrTb(QString str){
-	if(str.size()<=0){
-	return str;
-	}
+    if(str.size()<=0){
+    return str;
+    }
 str.replace(QString("\n"), QString("\n\t"));
 return "\n\t" + str;
 }
 
 
 void defpage::sgnRun(QUrl url){
-bool isInt=false;
-int charid=url.toString().toInt(&isInt, 10);
-	if(isInt){
+int charid=url.toString().remove(0,protocol.count()).toInt();
+//emit loadDefSgn(charid); a fix to try to generate a searching dialog when a link is clicked that failed. as even chained signals don't get drawn/ran until all the actions are done.
+	if(charid>0){
 	//emit loadDefSgn(charid); a fix to try to generate a searching dialog when a link is clicked that failed. as even chained signals don't get drawn/ran until all the actions are done.
 	this->setup(charid);
 	this->show();
 	this->activateWindow();
 	}
 	else{ 
-	}
+	};
+}
+
+//not being used anymore
+void defpage::sgnLoadDef(int i){
+this->setup(i);
+this->show();
 }
 
 
 
 void defpage::keyPressEvent(QKeyEvent *e){
-	if((e->key() == Qt::Key_C) && (e->modifiers().testFlag(Qt::ControlModifier))) {
-  	qApp->clipboard()->setText(deftxt->selectedText());
-	}
+    if((e->key() == Qt::Key_C) && (e->modifiers().testFlag(Qt::ControlModifier))) {
+    qApp->clipboard()->setText(deftxt->selectedText());
+    }
 }
 
 
 /*-----------------------------------------------------
  * pre:
  * post:
- * class for zhuyinw widget. Generates the widget to 
+ * class for zhuyinw widget. Generates the widget to
  * put into the zhuyin tab
 ------------------------------------------------------*/
 class zhuyinw : public QWidget{
 public:
-	void setup();
+    void setup();
 };
 
 
@@ -746,7 +759,7 @@ public:
  * pre:
  * post:
  * populates the widget of thiis class with the things
- * it needs. 
+ * it needs.
 ------------------------------------------------------*/
 void zhuyinw::setup(){
 QGridLayout *zyg=new QGridLayout(this);
@@ -782,8 +795,10 @@ list2Combo(zya, cbzya);
 QPushButton *pbSubmit = new QPushButton(this);
 pbSubmit->setText(lbls["search"]);
 
-clickTB *tbRes = new clickTB(cbzy1, cbzy2,cbzy3,cbzya, ldlbl);
-tbRes->setParent(this);
+QWebEngineView *tbRes = new QWebEngineView();
+clickTBP *tbResV = new clickTBP(cbzy1, cbzy2,cbzy3,cbzya, ldlbl);
+tbRes->setPage(tbResV);
+tbResV->setParent(tbRes);
 
 
 zyg->addWidget(cbzy1,0,0,Qt::AlignTop);
@@ -799,22 +814,38 @@ zyg->addWidget(pbSubmit,1,3,Qt::AlignTop);
 zyg->addWidget(tbRes,2,0,1,4,Qt::AlignTop| Qt::AlignHCenter);
 //connect button to clickTB slot to call function to get zhuyin from comboboxes then run sql query
 QObject::connect(pbSubmit, SIGNAL(pressed()), ldlbl, SLOT(setLoad()));
-QObject::connect(pbSubmit, SIGNAL(released()), tbRes, SLOT(sgnRun()));
+QObject::connect(pbSubmit, SIGNAL(released()), tbResV, SLOT(sgnRun()));
 //QObject::connect(tbRes, SIGNAL(clicked()), ldlbl, SLOT(setLoad()));
-QObject::connect(tbRes, SIGNAL(linkClicked(QUrl)), dp, SLOT(sgnRun(QUrl)));
+//QObject::connect(tbRes, SIGNAL(linkClicked(QUrl)), dp, SLOT(sgnRun(QUrl)));
+QObject::connect(tbRes->page(), SIGNAL(linkClicked(QUrl)), dp, SLOT(sgnRun(QUrl)));
 //QObject::connect(tbRes, SIGNAL(linkClicked(QUrl)), ldlbl, SLOT(setClear(QUrl)));
 
 this->setLayout(zyg);
 }
 
+clickTB::clickTB(){
+this->setMinimumSize(740,320);
+}
 
-clickTB::clickTB(QComboBox *cb1, QComboBox *cb2, QComboBox *cb3, QComboBox *cb4,loadLbl *ldlbl){
+bool clickTBP::acceptNavigationRequest(const QUrl & url, QWebEnginePage::NavigationType type, bool){
+    if (type == QWebEnginePage::NavigationTypeLinkClicked)
+    {
+        qWarning() << "url: " + url.toString();
+        emit linkClicked(url);
+        return false;
+    }
+    return true;
+}
+
+
+
+clickTBP::clickTBP(QComboBox *cb1, QComboBox *cb2, QComboBox *cb3, QComboBox *cb4,loadLbl *ldlbl){
 //this->setOpenLinks(false);
 
-this->setMinimumSize(740,320);
-this->page()->currentFrame()->setScrollBarPolicy(Qt::Vertical,Qt::ScrollBarAlwaysOn);
-this->page()->setLinkDelegationPolicy(QWebPage::DelegateAllLinks);
-	
+//this->setMinimumSize(740,320);
+//this->page()->currentFrame()->setScrollBarPolicy(Qt::Vertical,Qt::ScrollBarAlwaysOn);
+//this->page()->setLinkDelegationPolicy(QWebEnginePage::DelegateAllLinks);
+
 cbzy1=cb1;
 cbzy2=cb2;
 cbzy3=cb3;
@@ -822,46 +853,48 @@ cbzya=cb4;
 llbl=ldlbl;
 }
 
-clickTB::clickTB(QLineEdit *lineedit, loadLbl *ldlbl){
+clickTBP::clickTBP(QLineEdit *lineedit, loadLbl *ldlbl){
 //this->setOpenLinks(false);
 
-this->setMinimumSize(740,300);
-this->page()->currentFrame()->setScrollBarPolicy(Qt::Vertical,Qt::ScrollBarAlwaysOn);
-this->page()->setLinkDelegationPolicy(QWebPage::DelegateAllLinks);
+//this->setMinimumSize(740,300);
+//this->page()->currentFrame()->setScrollBarPolicy(Qt::Vertical,Qt::ScrollBarAlwaysOn);
+//this->page()->setLinkDelegationPolicy(QWebEnginePage::DelegateAllLinks);
 
 llbl=ldlbl;
-qle=lineedit;	
+qle=lineedit;
 }
 
 
 //allows to set a width and height
 //for learn tab
-clickTB::clickTB(int minw,int minh, int maxw, int maxh){
+//clickTBP::clickTBP(int minw,int minh, int maxw, int maxh){
+clickTBP::clickTBP(){
 //this->setOpenLinks(false);
+/*
 this->setMinimumSize(minw,minh);
 this->setMaximumSize(maxw,maxh);
 this->page()->currentFrame()->setScrollBarPolicy(Qt::Vertical,Qt::ScrollBarAsNeeded);
 this->page()->setLinkDelegationPolicy(QWebPage::DelegateAllLinks);
+*/
 }
 
 
-
-void clickTB::sgnRun(){
+void clickTBP::sgnRun(){
 this->setHtml(db2Str(sqlStr()));
 llbl->setClear();
 }
 
 //signal to get and fill random word
-void clickTB::sgnRnd(){
+void clickTBP::sgnRnd(){
 QHash<int,QString> word=rndWord(dict->itemData(dict->currentIndex()).toString());
-QString rtrn="<a href=\"" + QString::number(word.begin().key()) + "\"><span>" + word.begin().value() + "</span></a> ";
+QString rtrn="<a href=\"" + protocol + QString::number(word.begin().key()) + "\"><span>" + word.begin().value() + "</span></a> ";
 rtrn="<html><head><style>" + readCSS() + "</style></head><body>" + rtrn + "</body></html>";
 qle->setText(word.begin().value());
 this->setHtml(rtrn);
 }
 
 //add to pList AND database (run lrnTB::add2PList(QString word) and then reload this clickTB
-void clickTB::sgnAddPDict(){
+void clickTBP::sgnAddPDict(){
 	if(add2PList(qle->text())){
 	this->llbl->setText("[" +addWord + "] " + lbls["added"]);
 	}
@@ -875,12 +908,11 @@ this->setHtml(pList2Html());
 }
 
 //add to pList AND database (run lrnTB::add2PList(QString word) and then reload this clickTB
-void clickTB::sgnDelPDict(QUrl url){
-bool isInt=false;
-url.toString().toInt(&isInt, 10);
-	if(!isInt){
+void clickTBP::sgnDelPDict(QUrl url){
+QString urlstr=url.toString().remove(0,protocol.count());
+int charid=urlstr.toInt();
+	if(charid<=0){
 	//this is to check if the url has "d:" in front of it as that's a hack to determine an action from just the QUrl
-	QString urlstr=url.toString();
 		if(urlstr[0]=='d' && urlstr[1]==':'){
 		urlstr.remove(0,2);
 		delFrmPList(urlstr);
@@ -898,14 +930,14 @@ pre: pList existing. pListNum existing, lrnTb existing
 post: lrnTb->myList 
 takes pList (a QHash<QString,int>) and makes html out of it so it can be used for setHtml
 -------------------------*/
-QString clickTB::pList2Html(){
+QString clickTBP::pList2Html(){
 QString rtrn="";
 QList<QString> keys=pListOrd.keys();
 int pMax=pListId.count();
 int i=0;
 
 	while(i<pMax){
-	rtrn+="<a href=\"" + QString::number(pListId[i]) + "\"><span>" + pListChar[i] + "</span></a> <a href=\"d:" + pListChar[i] + "\"><span>[Delete]</span></a><br>";
+	rtrn+="<a href=\"" + protocol + QString::number(pListId[i]) + "\"><span>" + pListChar[i] + "</span></a> <a href=\"" + protocol + "d:" + pListChar[i] + "\"><span>[Delete]</span></a><br>";
 	i++;
 	}
 
@@ -914,7 +946,7 @@ return rtrn;
 }
 
 
-QString clickTB::db2Str(QString sqlstr){
+QString clickTBP::db2Str(QString sqlstr){
 sqlitedb *db=new sqlitedb(assetpath + dictDb);
 db->query(sqlstr);
 QString rtrn="";
@@ -923,20 +955,20 @@ QString temp="";
 QString head="";
 QString top="";
         while(db->result.isValid()){
-		// select c.id, c.char, h.zy_1, h.zy_2, h.zy_3, h.accent, h.zhuyin from hold as h left join char as c on h.char_id=c.id
-		temp=num2zy[db->result.value(2).toInt()] + num2zy[db->result.value(3).toInt()] + num2zy[db->result.value(4).toInt()] + num2zya[db->result.value(5).toInt()];
-		//temp=db->result.value(2).toString() + " " + db->result.value(3).toString() + " " +db->result.value(4).toString() + " " +db->result.value(5).toString();
-		if(curzy!=temp){
-		curzy=temp;
+        // select c.id, c.char, h.zy_1, h.zy_2, h.zy_3, h.accent, h.zhuyin from hold as h left join char as c on h.char_id=c.id
+        temp=num2zy[db->result.value(2).toInt()] + num2zy[db->result.value(3).toInt()] + num2zy[db->result.value(4).toInt()] + num2zya[db->result.value(5).toInt()];
+        //temp=db->result.value(2).toString() + " " + db->result.value(3).toString() + " " +db->result.value(4).toString() + " " +db->result.value(5).toString();
+        if(curzy!=temp){
+        curzy=temp;
 		head=top + "[" + temp + "] ";
                         if(top==""){
                         top="<br>";
                         }
-		}
-		else{
-		head="";
-		}
-	  rtrn+= head + "<a href=\"" + db->result.value(0).toString() + "\"><span>" + db->result.value(1).toString() + "</span></a> ";
+        }
+        else{
+        head="";
+        }
+      rtrn+= head + "<a href=\"" + protocol + db->result.value(0).toString() + "\"><span>" + db->result.value(1).toString() + "</span></a> ";
         db->next();
         }
 db->close();
@@ -945,64 +977,64 @@ return rtrn;
 }
 
 
-QString clickTB::sqlStr(){
+QString clickTBP::sqlStr(){
 QString rtrn;
 //CREATE TABLE hold(id int primary key, num int, pinyin text, char_id int, zy_1 int, zy_2 int, zy_3 int, accent int, zhuyin text);
 //CREATE TABLE char(id int primary key, char text, unum text, rad_id int, strokes int, strk_rad int);
 QString sqlstr="select c.id, c.char, h.zy_1, h.zy_2, h.zy_3, h.accent, h.zhuyin from hold as h left join char as c on h.char_id=c.id";
-QString sqlsort=" order by h.zy_1, h.zy_2, h.zy_3, h.accent"; 
+QString sqlsort=" order by h.zy_1, h.zy_2, h.zy_3, h.accent";
 QString where[4];
 
-	if(cbzy1->itemData(cbzy1->currentIndex())==0){
-	where[0]="zy_1 IS NULL ";
-	}
-	else if(cbzy1->itemData(cbzy1->currentIndex())==-1){
-	where[0]="";
-	}
-	else{
-	where[0]= "zy_1=" + cbzy1->itemData(cbzy1->currentIndex()).toString() + " ";
-	}
+    if(cbzy1->itemData(cbzy1->currentIndex())==0){
+    where[0]="zy_1 IS NULL ";
+    }
+    else if(cbzy1->itemData(cbzy1->currentIndex())==-1){
+    where[0]="";
+    }
+    else{
+    where[0]= "zy_1=" + cbzy1->itemData(cbzy1->currentIndex()).toString() + " ";
+    }
 
-	if(cbzy2->itemData(cbzy2->currentIndex())==0){
-	where[1]="zy_2 IS NULL ";
-	}
-	else if(cbzy2->itemData(cbzy2->currentIndex())==-1){
-	where[1]="";
-	}
-	else{
-	where[1]= "zy_2=" + QString::number(zy2num[cbzy2->currentText()]) + " ";
-	}
+    if(cbzy2->itemData(cbzy2->currentIndex())==0){
+    where[1]="zy_2 IS NULL ";
+    }
+    else if(cbzy2->itemData(cbzy2->currentIndex())==-1){
+    where[1]="";
+    }
+    else{
+    where[1]= "zy_2=" + QString::number(zy2num[cbzy2->currentText()]) + " ";
+    }
 
-	if(cbzy3->itemData(cbzy3->currentIndex())==0){
-	where[2]="zy_3 IS NULL ";
-	}
-	else if(cbzy3->itemData(cbzy3->currentIndex())==-1){
-	where[2]="";
-	}
-	else{
-	where[2]= "zy_3=" + QString::number(zy2num[cbzy3->currentText()]) + " ";
-	}
+    if(cbzy3->itemData(cbzy3->currentIndex())==0){
+    where[2]="zy_3 IS NULL ";
+    }
+    else if(cbzy3->itemData(cbzy3->currentIndex())==-1){
+    where[2]="";
+    }
+    else{
+    where[2]= "zy_3=" + QString::number(zy2num[cbzy3->currentText()]) + " ";
+    }
 
 
-	if(cbzya->currentIndex()==0){
-	where[3]="";
-	}
-	else{
-	where[3]= "accent=" + QString::number(zya2num[cbzya->currentText()]) + " ";
-	}
+    if(cbzya->currentIndex()==0){
+    where[3]="";
+    }
+    else{
+    where[3]= "accent=" + QString::number(zya2num[cbzya->currentText()]) + " ";
+    }
 
 QString wherestr;
 int i=0;
 int size=4;
-	while(i<size){
-		if(wherestr==""&&where[i]!=""){
-		wherestr=" where " + where[i];
-		}	
-		else if(where[i]!=""){
-		wherestr+="and " + where[i];
-		}
-	i++;
-	}
+    while(i<size){
+        if(wherestr==""&&where[i]!=""){
+        wherestr=" where " + where[i];
+        }
+        else if(where[i]!=""){
+        wherestr+="and " + where[i];
+        }
+    i++;
+    }
 
 rtrn=sqlstr + wherestr + sqlsort;
 return rtrn;
@@ -1017,7 +1049,7 @@ class for generating a widget for the radicals tab
 -----------------------------------------------------*/
 class radw : public QWidget{
 public:
-	void setup();
+    void setup();
 };
 
 
@@ -1054,16 +1086,16 @@ cblgeq->addItem("<=", 3);
 
 int i=0;
 int size=36;
-	while(i<=size){
-	cbstrk->addItem(QString::number(i),i);
-	i++;
-	}
+    while(i<=size){
+    cbstrk->addItem(QString::number(i),i);
+    i++;
+    }
 
 i=0;
-	while(i<=size){
-	cbnum->addItem(QString::number(i),i);
-	i++;
-	}
+    while(i<=size){
+    cbnum->addItem(QString::number(i),i);
+    i++;
+    }
 
 cbnum->hide();
 
@@ -1071,8 +1103,10 @@ cbnum->hide();
 QPushButton *pbSubmit = new QPushButton(this);
 pbSubmit->setText(lbls["search"]);
 
-clickTB *tbRes = new clickTB(cbrad,cbstrk,cblgeq,cbnum, ldlbl);
-tbRes->setParent(this);
+clickTB *tbRes = new clickTB();
+clickTBP *tbResV = new clickTBP(cbrad,cbstrk,cblgeq,cbnum, ldlbl);
+tbRes->setPage(tbResV);
+tbResV->setParent(this);
 
 radg->addWidget(cbrad,0,0,Qt::AlignTop);
 radg->addWidget(cbnum,0,1,Qt::AlignTop);
@@ -1088,22 +1122,22 @@ radg->addWidget(tbRes,2,0,1,4,Qt::AlignTop | Qt::AlignHCenter);
 
 QObject::connect(cblgeq, SIGNAL(currentIndexChanged(QString)), cbnum, SLOT(sgnHideShow(QString)));
 QObject::connect(pbSubmit, SIGNAL(pressed()), ldlbl, SLOT(setLoad()));
-QObject::connect(pbSubmit, SIGNAL(released()), tbRes, SLOT(sgnRadRun()));
+QObject::connect(pbSubmit, SIGNAL(released()), tbResV, SLOT(sgnRadRun()));
 //QObject::connect(tbRes, SIGNAL(clicked()), ldlbl, SLOT(setLoad()));
-QObject::connect(tbRes, SIGNAL(linkClicked(QUrl)), dp, SLOT(sgnRun(QUrl)));
+QObject::connect(tbResV, SIGNAL(linkClicked(QUrl)), dp, SLOT(sgnRun(QUrl)));
 //QObject::connect(tbRes, SIGNAL(linkClicked(QUrl)), ldlbl, SLOT(setClear(QUrl)));
 
 this->setLayout(radg);
 }
 
 
-void clickTB::sgnRadRun(){
+void clickTBP::sgnRadRun(){
 QString sqlq=radSqlStr();
 this->setHtml(radDb2Str(sqlq));
 llbl->setClear();
 }
 
-QString clickTB::radDb2Str(QString sqlstr){
+QString clickTBP::radDb2Str(QString sqlstr){
 sqlitedb *db=new sqlitedb(assetpath + dictDb);
 db->query(sqlstr);
 //select id, char, rad_id, strokes, strk_rad from char where strokes=1 order by strokes
@@ -1122,33 +1156,34 @@ QString head="";
 QString subhead="";
 int subheadind=0;
 QString top="";
-        while(db->result.isValid()){
-		if(israd==1){
-		//select id, char, rad_id, strokes, strk_rad from char where strokes=1 order by strokes
-		//select id, char, rad_id, strokes, strk_rad from char where strokes>1 and strokes<1 order by strokes
-		temp=rad.at(db->result.value(2).toInt())+"+"+db->result.value(4).toString();
-		}
-		else{
+
+    while(db->result.isValid()){
+        if(israd==1){
+        //select id, char, rad_id, strokes, strk_rad from char where strokes=1 order by strokes
+        //select id, char, rad_id, strokes, strk_rad from char where strokes>1 and strokes<1 order by strokes
+        temp=rad.at(db->result.value(2).toInt())+"+"+db->result.value(4).toString();
+        }
+        else{
                 temp=db->result.value(3).toString();
-		}
-		if(cursec!=temp){
-		cursec=temp;		
-		head=top+"[" + temp + "] ";
-			if(top==""){
-			top="<br>";
-			}
-		}
-		else{
-		head="";
-		}
-		if(israd==0&&subheadind!=db->result.value(2).toInt()){
-		subheadind=db->result.value(2).toInt();
-		subhead="    ("+rad.at(db->result.value(2).toInt())+") ";
-		}
-		else{
-		subhead="";
-		}
-	rtrn+= head + subhead + "<a href=\"" + db->result.value(0).toString() + "\"><span>" + db->result.value(1).toString() + "</span></a> ";
+        }
+        if(cursec!=temp){
+        cursec=temp;
+        head=top+"[" + temp + "] ";
+            if(top==""){
+            top="<br>";
+            }
+        }
+        else{
+        head="";
+        }
+        if(israd==0&&subheadind!=db->result.value(2).toInt()){
+        subheadind=db->result.value(2).toInt();
+        subhead="    ("+rad.at(db->result.value(2).toInt())+") ";
+        }
+        else{
+        subhead="";
+        }
+    rtrn+= head + subhead + "<a href=\"" + protocol + db->result.value(0).toString() + "\"><span>" + db->result.value(1).toString() + "</span></a> ";
         db->next();
         }
 db->close();
@@ -1158,7 +1193,7 @@ return rtrn;
 
 
 
-QString clickTB::radSqlStr(){
+QString clickTBP::radSqlStr(){
 //clickTB *tbRes = new clickTB(cbrad,cbstrk,cblgeq,cbnum);
 
 ///QString qsrad = cbzy1->currentText(); // cbrad
@@ -1174,54 +1209,56 @@ QString where;
 //CREATE TABLE char(id int primary key, char text, unum text, rad_id int, strokes int, strk_rad int);
 // select id, char, rad_id, strokes, strk_rad from char where (rad_id="<some rad id>" and strk_rad and strk_rad)|(strokes and stroke)"
 //2017-05-27 changing over from currentIndex or currentText to itemData for something more useul //jabbwock
-	if(qsrad=="0"){
-	whrcnd="strokes";
-	}
-	else{
-	whrcnd="strk_rad";
-	where+="rad_id=" + qsrad;
-	}
+    if(qsrad=="0"){
+    whrcnd="strokes";
+    }
+    else{
+    whrcnd="strk_rad";
+    where+="rad_id=" + qsrad;
+    }
 
-	if(where!=""){
-	where+=" and ";
-	}
+    if(where!=""){
+    where+=" and ";
+    }
 
-	if(qslgeq=="="){
-	where+=whrcnd + qslgeq + qsstrk;
-	}
-	else if(qslgeq=="~"){
-	int num=qsstrk.toInt();
-	QString genum=QString::number(num+1);
-	QString lenum=QString::number(num-1);
-	where+=whrcnd + ">=" + lenum + " and " + whrcnd + "<=" + genum; 
-	}
-	else if(qslgeq=="<"){
+    if(qslgeq=="="){
+    where+=whrcnd + qslgeq + qsstrk;
+    }
+    else if(qslgeq=="~"){
+    int num=qsstrk.toInt();
+    QString genum=QString::number(num+1);
+    QString lenum=QString::number(num-1);
+    where+=whrcnd + ">=" + lenum + " and " + whrcnd + "<=" + genum;
+    }
+    else if(qslgeq=="<"){
         where+=whrcnd + ">" + qsnum + " and " + whrcnd + "<" + qsstrk;
-	}
-	else if(qslgeq=="<="){
+    }
+    else if(qslgeq=="<="){
         where+=whrcnd + ">=" + qsnum + " and " + whrcnd + "<=" + qsstrk;
-	}
+    }
 rtrn="select id, char, rad_id, strokes, strk_rad from char where "+ where + " order by strokes, rad_id";
 return rtrn;
 }
 
-void clickTB::mousePressEvent(QMouseEvent *event){
+/*
+void clickTBP::mousePressEvent(QMouseEvent *event){
 emit clicked();
 }
+*/
 
-QString clickTB::freeSqlStr(){
+QString clickTBP::freeSqlStr(){
 QString word=qle->text();
 QString sqlq="select id, char from char where char LIKE \"%" + word + "%\" order by rad_id desc, id asc";
 return sqlq;
 }
 
-QString clickTB::freeDb2Str(QString sqlstr){
+QString clickTBP::freeDb2Str(QString sqlstr){
 sqlitedb *db=new sqlitedb(assetpath + dictDb);
 db->query(sqlstr);
 QString rtrn="";
 QString head="";
         while(db->result.isValid()){
-	rtrn+= head + "<a href=\"" + db->result.value(0).toString() + "\" class=\"free\"><span>" + db->result.value(1).toString() + "</span></a> ";
+    rtrn+= head + "<a href=\"" + protocol + db->result.value(0).toString() + "\" class=\"free\"><span>" + db->result.value(1).toString() + "</span></a> ";
         db->next();
         }
 db->close();
@@ -1231,19 +1268,19 @@ return rtrn;
 }
 
 
-QString clickTB::engSqlStr(){
+QString clickTBP::engSqlStr(){
 QString word=qle->text();
 QString sqlq="select c.id, c.char, t.def from translation as t left join char as c on t.char_id=c.id where t.lang=\"English\" and lower(def) LIKE \"%" + word + "%\" order by length(def),c.id asc";
 return sqlq;
 }
 
-QString clickTB::engDb2Str(QString sqlstr){
+QString clickTBP::engDb2Str(QString sqlstr){
 sqlitedb *db=new sqlitedb(assetpath + dictDb);
 db->query(sqlstr);
 QString rtrn="";
 QString head="";
         while(db->result.isValid()){
-	rtrn+= head + "<a href=\"" + db->result.value(0).toString() + "\" class=\"eng\"><span>[" + db->result.value(2).toString() + "] "+ db->result.value(1).toString() + "</span></a> ";
+    rtrn+= head + "<a href=\"" + protocol + db->result.value(0).toString() + "\" class=\"eng\"><span>[" + db->result.value(2).toString() + "] "+ db->result.value(1).toString() + "</span></a> ";
         db->next();
         }
 db->close();
@@ -1252,13 +1289,13 @@ return rtrn;
 
 }
 
-void clickTB::sgnFreeRun(){
+void clickTBP::sgnFreeRun(){
 QString sqlq=freeSqlStr();
 this->setHtml(freeDb2Str(sqlq));
 llbl->setClear();
 }
 
-void clickTB::sgnEngRun(){
+void clickTBP::sgnEngRun(){
 QString sqlq=engSqlStr();
 this->setHtml(engDb2Str(sqlq));
 llbl->setClear();
@@ -1266,10 +1303,10 @@ llbl->setClear();
 
 
 void clickComboBox::sgnHideShow(QString str){
-	if(str=="="||str=="~"){
-	this->hide();
-	return;
-	}
+    if(str=="="||str=="~"){
+    this->hide();
+    return;
+    }
 this->show();
 }
 
@@ -1293,7 +1330,7 @@ this->setText(lbls["added"]);
 /*-----------------------------------------------------
  *pre:
  *post:
- * reads the css, erhm... qss file into a qstring and 
+ * reads the css, erhm... qss file into a qstring and
  * returns it
 ------------------------------------------------------*/
 QString readStyle(){
@@ -1321,14 +1358,14 @@ post:
 ----------------------------------------------------*/
 class freeSearch : public QWidget{
 public:
-	void setup();
+    void setup();
 };
 
 /*-----------------------------------------------------
  * pre:
  * post:
  * populates the widget of thiis class with the things
- * it needs. 
+ * it needs.
 ------------------------------------------------------*/
 void freeSearch::setup(){
 QGridLayout *zyg=new QGridLayout(this);
@@ -1345,8 +1382,10 @@ QPushButton *pbSubmit = new QPushButton(this);
 pbSubmit->setFixedWidth(200);
 pbSubmit->setText(lbls["search"]);
 
-clickTB *tbRes = new clickTB(leIn, ldlbl);
-tbRes->setParent(this);
+clickTB *tbRes = new clickTB();
+clickTBP *tbResV = new clickTBP(leIn, ldlbl);
+tbRes->setPage(tbResV);
+tbResV->setParent(this);
 
 
 zyg->addWidget(leIn,0,0,Qt::AlignTop | Qt::AlignLeft);
@@ -1356,9 +1395,9 @@ zyg->addWidget(tbRes,2,0,1,4,Qt::AlignBottom);
 
 //connect button to clickTB slot to call function to get zhuyin from comboboxes then run sql query
 QObject::connect(pbSubmit, SIGNAL(pressed()), ldlbl, SLOT(setLoad()));
-QObject::connect(pbSubmit, SIGNAL(released()), tbRes, SLOT(sgnFreeRun()));
+QObject::connect(pbSubmit, SIGNAL(released()), tbResV, SLOT(sgnFreeRun()));
 //QObject::connect(tbRes, SIGNAL(clicked()), ldlbl, SLOT(setLoad()));
-QObject::connect(tbRes, SIGNAL(linkClicked(QUrl)), dp, SLOT(sgnRun(QUrl)));
+QObject::connect(tbResV, SIGNAL(linkClicked(QUrl)), dp, SLOT(sgnRun(QUrl)));
 
 this->setLayout(zyg);
 }
@@ -1370,14 +1409,14 @@ post:
 ----------------------------------------------------*/
 class engw : public QWidget{
 public:
-	void setup();
+    void setup();
 };
 
 /*-----------------------------------------------------
  * pre:
  * post:
  * populates the widget of thiis class with the things
- * it needs. 
+ * it needs.
 ------------------------------------------------------*/
 void engw::setup(){
 QGridLayout *zyg=new QGridLayout(this);
@@ -1394,8 +1433,10 @@ QPushButton *pbSubmit = new QPushButton(this);
 pbSubmit->setFixedWidth(200);
 pbSubmit->setText(lbls["search"]);
 
-clickTB *tbRes = new clickTB(leIn, ldlbl);
-tbRes->setParent(this);
+clickTB *tbRes = new clickTB();
+clickTBP *tbResV = new clickTBP(leIn, ldlbl);
+tbRes->setPage(tbResV);
+tbResV->setParent(this);
 
 
 zyg->addWidget(leIn,0,0,Qt::AlignTop | Qt::AlignLeft);
@@ -1405,10 +1446,10 @@ zyg->addWidget(tbRes,2,0,1,4,Qt::AlignBottom);
 
 //connect button to clickTB slot to call function to get zhuyin from comboboxes then run sql query
 QObject::connect(pbSubmit, SIGNAL(pressed()), ldlbl, SLOT(setLoad()));
-QObject::connect(pbSubmit, SIGNAL(released()), tbRes, SLOT(sgnEngRun()));
+QObject::connect(pbSubmit, SIGNAL(released()), tbResV, SLOT(sgnEngRun()));
 
 //QObject::connect(tbRes, SIGNAL(linkClicked(QUrl)), ldlbl, SLOT(setLoad(QUrl)));
-QObject::connect(tbRes, SIGNAL(linkClicked(QUrl)), dp, SLOT(sgnRun(QUrl)));
+QObject::connect(tbResV, SIGNAL(linkClicked(QUrl)), dp, SLOT(sgnRun(QUrl)));
 //QObject::connect(dp, SIGNAL(loadDefSgn(int)), dp, SLOT(sgnLoadDef(int)));
 //QObject::connect(tbRes, SIGNAL(linkClicked(QUrl)), ldlbl, SLOT(setClear(QUrl)));
 
@@ -1440,13 +1481,20 @@ ldlbl->setText("");
 //ComboBox for which dictionary
 //rnd.append("<a class=\"rnd\" href=\"#\">"+lbls["rand"]+"</a>");
 //pList.append("list1");
-clickTB *rndChar = new clickTB(40,40,200,70);
+QWebEngineView *rndChar= new QWebEngineView();
+clickTBP *rndCharV = new clickTBP();
+rndChar->setPage(rndCharV);
+rndCharV->setParent(rndChar);
 
-clickTB *myList=new clickTB(40,40,370,470);
-myList->llbl=ldlbl;
+QWebEngineView *myList=new QWebEngineView();
+clickTBP *myListV=new clickTBP();
+myList->setPage(myListV);
+myListV->setParent(myList);
+
+myListV->llbl=ldlbl;
 	if(pDbExists){
 	loadPDict();
-	myList->setHtml(myList->pList2Html());
+	myListV->setHtml(myListV->pList2Html());
 	}
 
 QPushButton *rndSubmit = new QPushButton(this);
@@ -1517,15 +1565,15 @@ mnGrd->addWidget(rndBox,0,0,1,1,Qt::AlignTop | Qt::AlignLeft);
 
 //QHash<int,QString> rtrn=this->rndWord("personal");
 //qWarning() << "key: " << QString::number(rtrn.begin().key()) << ", word: " << rtrn.begin().value() <<endl;
-rndChar->dict=wDB; //set rndChar's instance of QComboBox with this object's 
+rndCharV->dict=wDB; //set rndChar's instance of QComboBox with this object's 
 //QComboBox of which dictionary selected. Because signal -> slot needs the instance to call it
-rndChar->qle=add2PersDictLE;
-myList->qle=add2PersDictLE;
-QObject::connect(rndSubmit, SIGNAL(pressed()), rndChar, SLOT(sgnRnd()));
-QObject::connect(rndChar, SIGNAL(linkClicked(QUrl)), dp, SLOT(sgnRun(QUrl)));
-QObject::connect(add2PersDict, SIGNAL(pressed()), myList, SLOT(sgnAddPDict()));
-QObject::connect(myList, SIGNAL(linkClicked(QUrl)), dp, SLOT(sgnRun(QUrl)));
-QObject::connect(myList, SIGNAL(linkClicked(QUrl)), myList, SLOT(sgnDelPDict(QUrl)));
+rndCharV->qle=add2PersDictLE;
+myListV->qle=add2PersDictLE;
+QObject::connect(rndSubmit, SIGNAL(pressed()), rndCharV, SLOT(sgnRnd()));
+QObject::connect(rndCharV, SIGNAL(linkClicked(QUrl)), dp, SLOT(sgnRun(QUrl)));
+QObject::connect(add2PersDict, SIGNAL(pressed()), myListV, SLOT(sgnAddPDict()));
+QObject::connect(myListV, SIGNAL(linkClicked(QUrl)), dp, SLOT(sgnRun(QUrl)));
+QObject::connect(myListV, SIGNAL(linkClicked(QUrl)), myListV, SLOT(sgnDelPDict(QUrl)));
 
 this->setLayout(mnGrd);
 }
@@ -1570,7 +1618,6 @@ homepath=cwd + assets;
 
 return "";
 }
-
 
 
 QString checkfont(QString fontp, int fonti){
@@ -1629,7 +1676,7 @@ db->close();
 -----------------------------------------------------*/
 int main(int argc, char **argv)
 {
-	
+
 QApplication app (argc, argv);
 app.setApplicationName("mae-moedict");
 //asset path
@@ -1647,15 +1694,14 @@ pdictDb="db/personal.db";
     return 0;
     }
 qWarning() << "using assetpath "+assetpath;
-//assetpath="/scratchbox/users/sleepingkirby/home/sleepingkirby/dev/mae-moedict/assets/";
 
 
 // set font for chinese
-QTextCodec::setCodecForTr(QTextCodec::codecForName("utf8"));
-QTextCodec::setCodecForCStrings(QTextCodec::codecForLocale());
+QTextCodec::setCodecForLocale(QTextCodec::codecForName("utf8"));
+//QTextCodec::setCodecForCStrings(QTextCodec::codecForLocale());
 QString fontpath=assetpath + "fonts/DroidSansFallbackFull.ttf";
-int fontId = QFontDatabase::addApplicationFont(fontpath);//only font that can do zhuyin and characters
 
+int fontId = QFontDatabase::addApplicationFont(fontpath);//only font that can do zhuyin and characters
 
 //if font doesn't exists but assets folder does or permissons for it are messed up.
 QString checkf=checkfont(fontpath, fontId);
@@ -1673,14 +1719,11 @@ QString msyh = QFontDatabase::applicationFontFamilies(fontId).at(0);
 QFont font(msyh,10);
 QApplication::setFont(font);
 
-//init load Labels
 loadlbls();
-
 //get max char id number
 getMax();
 
-QString about= "<html><head><style>" + readCSS() + "</style></head><body id=\"about\"><div>Compiled: 2018-05-20<br><a href=\"https://github.com/sleepingkirby/mae-moedict\">https://github.com/sleepingkirby/mae-moedict</a><br><br>If you find this program useful, please consider donation: <br>" + lbls["ifuseful"]+ " <br><br>Patreon: <a href=\"https://www.patreon.com/wklaume\">https://www.patreon.com/wklaume</a></div><div>PayPal: <a href=\"https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=3EE2P5RCJ6V9S\">https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=3EE2P5RCJ6V9S</a></div><br><br>All suggestions/bug reports are welcome. <br>" + lbls["bugsugg"] + "</body></html>";
-
+QString about= "<html><head><style>" + readCSS() + "</style></head><body id=\"about\"><div>Compiled: 2017-10-05<br><a href=\"https://github.com/sleepingkirby/mae-moedict\">https://github.com/sleepingkirby/mae-moedict</a><br><br>If you find this program useful, please consider donation: <br>" + lbls["ifuseful"]+ " <br><br>Patreon: <a href=\"https://www.patreon.com/wklaume\">https://www.patreon.com/wklaume</a></div><div>PayPal: <a href=\"https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=3EE2P5RCJ6V9S\">https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=3EE2P5RCJ6V9S</a></div><br><br>All suggestions/bug reports are welcome. <br>" + lbls["bugsugg"] + "</body></html>";
 
 //tab headers
 QString tabzhuyin=lbls["zhuyin"];
@@ -1729,7 +1772,7 @@ eng->setup();
 //about tab
 QWidget *aboutw=new QWidget();
 QGridLayout *aboutGL = new QGridLayout();
-QWebView *aboutTB = new QWebView();
+clickTB *aboutTB = new clickTB();
 aboutTB->setHtml(about);
 aboutTB->setMinimumSize(780,400);
 aboutGL->addWidget(aboutTB,0,0,Qt::AlignCenter);
@@ -1758,5 +1801,7 @@ delete(rdw);
 delete(frees);
 delete(eng);
 delete(aboutTB);
+delete(lrn);
+delete(dp);
 return i;
 }

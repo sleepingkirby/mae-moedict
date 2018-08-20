@@ -1,7 +1,8 @@
 #include <QObject> 
 #include <QLabel> 
 #include <QUrl>
-#include <QWebView>
+#include <QWebEngineView>
+#include <QWebEnginePage>
 #include <QComboBox>
 #include <sqlitedb.h>
 #include <QGridLayout>
@@ -9,7 +10,6 @@
 #include <QDialog>
 #include <QMouseEvent>
 #include <QLineEdit>
-#include <QScrollArea>
 
 QString readCSS();
 QString readFile(QString path);
@@ -24,8 +24,8 @@ public slots:
         void setLoad();
         void setLoad(QUrl url);
         void setClear();
-	void setClear(QUrl url);
-	void sgnAdded();
+		void setClear(QUrl url);
+		void sgnAdded();
 };
 
 /*------------------------------------
@@ -57,7 +57,7 @@ CREATE TABLE translation(id int primary key, char_id int, lang text, def text);
         QHash<QString, int> tbltrans;
         QGridLayout *glayout;
         //QTextBrowser *deftxt;
-        QWebView *deftxt;
+        QWebEngineView *deftxt;
 
 signals:
 	void loadDefSgn(int i);
@@ -65,22 +65,32 @@ signals:
 public slots:
 
 	void sgnRun(QUrl url);
-	//void sgnLoadDef(int i); not being used anymore
+	void sgnLoadDef(int i);
 	void keyPressEvent(QKeyEvent *e); //used for crtl-c
 
 };
 
 
-//class clickTB : public QTextBrowser{
-class clickTB : public QWebView{
+class clickTB : public QWebEngineView{
+Q_OBJECT
+
+public:
+    clickTB();
+};
+
+
+
+
+//class clickTBP : public QTextBrowser{
+class clickTBP : public QWebEnginePage{
 Q_OBJECT
 
 
 public:
-	clickTB(QComboBox *cb1, QComboBox *cb2, QComboBox *cb3, QComboBox *cb4, loadLbl *ldlbl); //to get value of comboboxes
-	clickTB(QLineEdit *lineedit, loadLbl *ldlbl); //to get value of comboboxes
-	clickTB(); //to get value of comboboxes
-	clickTB(int minw, int minh, int maxw, int maxh); //to get value of comboboxes
+
+    clickTBP(QComboBox *cb1, QComboBox *cb2, QComboBox *cb3, QComboBox *cb4, loadLbl *ldlbl); //to get value of comboboxes
+    clickTBP(QLineEdit *lineedit, loadLbl *ldlbl); //to get value of comboboxes
+	clickTBP();
 	QString sqlStr();
 	QString db2Str(QString sqlstr);
 
@@ -93,34 +103,36 @@ public:
 	QString engSqlStr();
 	QString engDb2Str(QString sqlstr);
 
-	QString qlist2Html(QList<QString> qlist);
-
+	QString qlist2Html(QList<QString> qlist); 
 	QString pList2Html();
 	
 	QComboBox *cbzy1;
         QComboBox *cbzy2;
         QComboBox *cbzy3;
         QComboBox *cbzya;
-	QComboBox *dict;
+		QComboBox *dict;
 	loadLbl *llbl;
 	
 	QLineEdit *qle;
 
+    bool acceptNavigationRequest(const QUrl & url, QWebEnginePage::NavigationType type, bool);
+
 signals:
 	void clicked();
+    void linkClicked(const QUrl&);
 
 protected:
 	void mousePressEvent(QMouseEvent* event);
 
 public slots:
-
 	void sgnRun();
-        void sgnRadRun();
-        void sgnFreeRun();
+    void sgnRadRun();
+    void sgnFreeRun();
 	void sgnEngRun();
 	void sgnRnd();
 	void sgnAddPDict();
 	void sgnDelPDict(QUrl url);
+
 };
 
 
@@ -143,11 +155,8 @@ Q_OBJECT
 public:
 	loadLbl *ldlbl;
         void setup();
-/*
-public slots:
-        void sgnLdLbl(); //generate random word from button press
-        void sgnWrdAdd(); //add word from input
-        void sgnDelWrd(QUrl url);
-*/
+
 };
+
+
 
