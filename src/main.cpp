@@ -1759,5 +1759,7 @@ delete(rdw);
 delete(frees);
 delete(eng);
 delete(aboutTB);
+delete(lrn);
+delete(dp);
 return i;
 }
