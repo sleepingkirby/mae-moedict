@@ -1,37 +1,25 @@
 Traditional Chinese Dicitonary/臺灣正體辭典
 https://github.com/sleepingkirby/mae-moedict
 
-*NOTE: These notes are for the windows version only.* 
-Due to QT 4.8 being almost impossible to build on newer machines, the windows version was built on QT5.6 (as this is the version that both has QWebEngine and still runs on the Visual Studio version that I have). As such there are a few differences between this and the linux/maemo verions. Mostly unnoticeable except for programmers.
-- Win7+ 64bit only at this time.
-- Qt 5.6 was used. As such, different properties/behaviors will occur such as the scrollbar, asynchronous calls and lack of borders on the results box.
-- the css stylesheet was modified to make it look better for the windows theme.
-- When I originally did my research, I ran across an article on how Qt can be ran natively on windows. That's not the case. As such, unlike linux or maemo where you can just apt-get install qt5, you have to bundle the DLL's with the program. 
+*NOTE: Current compile is for devuan/debian/ubuntu with additional compiles for maemo and windows*
 
 
-The entire program will be bundled within a folder. All that's needed to run the program, assets folder included (read below for more on that and if you want to customize where it is), is within that folder. Simply extract the zip file and run "mae-moedict.exe". Because of the size for the DLL's needed for windows, the complete compiled version will not be on github (github doesn't like 50+MB files for its source), instead, it's on my googledrive:
-https://drive.google.com/open?id=0B83OJsnf-JFLaXJicjZBTUVlbXM
-
-The "assets" folder, as it is, is needed for this program to work. "mae-moedict.exe" will look for the "assets" folder in one of 4 places in order:
-
-1) <homepath, linux, maemo or windows>/.mae-moedict/
-2) <maemo homepath/MyDocs>/.mae-moedict/assets/ 
-3) /media/mmc1/.mae-moedict/ (maemo external storage path)
-4) current working directory of "mae-moecit.exe"
-
-If it can't find it, it'll warn you and quit.
-While it will look for the assents folder, it won't confirm that all the files it needs are in there so please make sure to have the folder as is and not just make a new assets folder.
-
----------------------------------------------------- maemo/linux notes below----------------------------------------------------------------------------------------------
 my first QT application. Made for nokia n900. Also works in linux (tested with Devuan/Debian) Works with qt4.8 only. Requires SQLite and QT4.
 Definitions based off of moedict pack files:
-https://github.com/racklin/moedict-desktop/
+https://github.com/g0v/moedict-app/tree/gh-pages/pack
+json to sql conversion done by moedict2sqlite (I'll upload that soon)
 
 Did this in a rush so there aren't a lot of documentation comments in code.  Because I wanted it done as soon as possible. But, also, QT is horrible to work with. Bad/wrong documentation. Some functions don't work as they should. Inconsistent function parameters for the same class. Can't do much without rewriting your own classes. Needs classes for virtually everything. Some functions just don't plain work (set scroll bars, set dimensions via qss), the css-like syntax is used but only missing other css syntax as well as changed the format of the declarations for no good reason. qss can't be applied to named elements (or at least, no way I could find in the documentation).  And other reasons I don't remember at the moment. 
 
+
 Installation:
 The packaging procedures for maemo via QT is a bit buggy didn't have the time to work it out. Put the mae-moedict binary somewhere you can run it. I personally put it under /opt/maemo/dev/mae-moedict/
-Put the assets folder (as is) into /home/user/MyDocs/.mae-moedict/
+Put the assets folder (as is) into one of the following places (the program will yell at you if you don't):
+
+- <homepath, linux, maemo or windows>/.mae-moedict/
+- <maemo homepath/MyDocs>/.mae-moedict/assets/
+- /media/mmc1/.mae-moedict/ (maemo external storage path)
+- current working directory of "mae-moedict.exe"
 
 Run mae-moedict binary and have fun learning.
 
@@ -39,12 +27,12 @@ Run mae-moedict binary and have fun learning.
 Here's how I did it:
 Get on a linux computer
 open the terminal
-copy over the sqlite db from assets/db/mae-moedict.db into a folder
+copy over the sqlite db from assets/db/mae-moedict.db into the assets folder
 do:
 --------------------------
 mkdir voices
 cd voices
-for n in `sqlite3 ../mae-moedict.db  "select num from hold where num!=''"|grep -Ei "[a-z]"`;do wget https://203146b5091e8f0aafda-15d41c68795720c6e932125f5ace0c70.ssl.cf1.rackcdn.com/$n.ogg;done
+for n in `sqlite3 ../mae-moedict.db  "select num from hold where num!=''"`;do wget https://203146b5091e8f0aafda-15d41c68795720c6e932125f5ace0c70.ssl.cf1.rackcdn.com/$n.ogg;done
 --------------------------
 
 
@@ -69,16 +57,35 @@ TextBrowser objects replaced with WebView objects. Allows for full html and CSS 
 UPDATE 2016/07/25
 Added Free, English and About (to make sure the link to the source is available in the program) and Copy functionality (because that needs to be done manually, apparently.).
 
-UPDATE 2017/09/04
+UPDATE 2016/09/04
 Diverted some styles, previously hardcoded, into the style sheets in assets. This is to allow for easier/customization of font sizes, colors, etc. Useful when compiling for different OS's with different themes. 
 
-UPDATE 2017/10/05 (to match linux update) Updated the return window for the tab stroke so that any returned result that is part of a separate stroke will be on a new line. It will also group the results by radical and label as such to allow for someone to more easily find the character they're searching for. The radical return will also put the results on it's own new line if the results have multiple strokes. Added a basic .sql file so that any updated/new .db from "moedict2sqlite" can have the labels needed for the program added.
+UPDATE 2017/09/13
+Put all unicode characters meant for the interface into the sql table to allow for the windows version to not choke on compile. Added and uploaded a windows version via QT 5.6
+
+UPDATE 2017/09/30
+Updated the return window for the tab stroke so that any returned result that is part of a separate stroke will be on a new line. It will also group the results by radical and label as such to allow for someone to more easily find the character they're searching for.
+The radical return will also put the results on it's own new line if the results have multiple strokes.
+Added a basic .sql file so that any updated/new .db from "moedict2sqlite" can have the labels needed for the program added.
+
+UPDATE 2017/12/13
+Changed the "num" column in the table "hold" to text from string. This prevents the truncation of the num that has any leading zero's. This allows for download of all audio files.
+
+UPDATE 2018/05/20
+Major update. Included a new learning (學習) tab which includes a randon word function as well as a personal word list db management. Can select from random word from personal or all dictionary. Also changed so that, on the desktop OS's (windows, devuan/debian), when clicking on a new word while the word definition page is up in the background, that page will load the new definition and be brought to the foreground.
+
+UPDATE 2018/08/19
+Thought it had everything I need, turns out not. Made it so that the list in the learning tab is sorted from most recently added to oldest instead of arbitrary (which I thought with learning if the words are listed randomly, but it turns out that it just made it harder to manage). Also added messages stating if it had been added or removed. Also made it so that the 注音符號 results are newlined at the end of each permutation just like the stroke/radical tab. 
+
+UPDATE 2018/08/21
+Updated new features to windows side. For some reason, on the window side, the function I used to check if a string is an int evaluates as false for all cases. Had to do different evaluation to check to make sure it's a proper id. I'm putting the windows versionon my google drive because it's too big to fit on the github. Just extract anywhere and run mae-moedict.exe inside the folder.
+https://drive.google.com/drive/folders/0B83OJsnf-JFLZjNRRFlvQm1EeDg?usp=sharing
 
 Known Issues: 
 - Due to vfat and the 36000+ ogg files, you can't load it all the files into the same directory. If audio is a must, one of the following must happen:
   1) device a tree directory structure to hold all the audio files.
   2) use a file system like ext2 (just not fat) to hold the files. 
-- Audio in definitions page won't play. Probably due to QT limitations on the nokia n900
+- Audio in definitions will play, but you can't hear the audio. Probably due to QT limitations/bug.
 - Added a work around to include the path + mplayer to the definitions. Can be copied and pasted into the terminal.
 
 
