@@ -1,6 +1,20 @@
 Traditional Chinese Dicitonary/臺灣正體辭典
 https://github.com/sleepingkirby/mae-moedict
 
+Qt5 version.
+Latest Devuan removes Qt4 support. Recompiling for Qt5. A lot has changed in Qt5.
+
+
+Need to install (as in, apt-get):
+qtwebengine5-dev
+libqt5webenginewidgets
+libqt5webengine5 (why need this AND qtwebengine5-dev? No idea... But you do.)
+
+in addition to:
+libqt5sql5-sqlite
+
+============================ old ==================================================================
+
 *NOTE: Current compile is for devuan/debian/ubuntu with additional compiles for maemo and windows*
 
 

@@ -12,6 +12,7 @@ QT += sql
 QT += gui
 QT += widgets
 QT += webview
+QT += webengine
 QT += webenginewidgets
 
 # Input

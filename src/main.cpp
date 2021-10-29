@@ -491,11 +491,13 @@ CREATE TABLE translation(id int primary key, char_id int, lang text, def text);
 	tbltrans["def"]=3;
   glayout = new QGridLayout(this);
         //deftxt = new QTextBrowser(this);
-        deftxt = new QWebView(this);
+        deftxt = new QWebEngineView(this);
 
         //deftxt->setTextInteractionFlags(Qt::TextSelectableByMouse | Qt::TextSelectableByKeyboard);
         //deftxt->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
-	deftxt->page()->currentFrame()->setScrollBarPolicy(Qt::Vertical,Qt::ScrollBarAlwaysOn);
+	      
+        //no longer needed as of Qt5
+        //deftxt->page()->currentFrame()->setScrollBarPolicy(Qt::Vertical,Qt::ScrollBarAlwaysOn);
         deftxt->setMinimumSize(740, 380);
         //deftxt->setReadOnly(true);
 }
@@ -812,7 +814,8 @@ clickTB::clickTB(QComboBox *cb1, QComboBox *cb2, QComboBox *cb3, QComboBox *cb4,
 //this->setOpenLinks(false);
 
 this->setMinimumSize(740,320);
-this->page()->currentFrame()->setScrollBarPolicy(Qt::Vertical,Qt::ScrollBarAlwaysOn);
+//no longer needed as of Qt5
+//this->page()->currentFrame()->setScrollBarPolicy(Qt::Vertical,Qt::ScrollBarAlwaysOn);
 //this->page()->setLinkDelegationPolicy(QWebEnginePage::DelegateAllLinks);
 	
 cbzy1=cb1;
@@ -826,7 +829,8 @@ clickTB::clickTB(QLineEdit *lineedit, loadLbl *ldlbl){
 //this->setOpenLinks(false);
 
 this->setMinimumSize(740,300);
-this->page()->currentFrame()->setScrollBarPolicy(Qt::Vertical,Qt::ScrollBarAlwaysOn);
+//no longer needed as of Qt5
+//this->page()->currentFrame()->setScrollBarPolicy(Qt::Vertical,Qt::ScrollBarAlwaysOn);
 //this->page()->setLinkDelegationPolicy(QWebEnginePage::DelegateAllLinks);
 
 llbl=ldlbl;
@@ -840,7 +844,8 @@ clickTB::clickTB(int minw,int minh, int maxw, int maxh){
 //this->setOpenLinks(false);
 this->setMinimumSize(minw,minh);
 this->setMaximumSize(maxw,maxh);
-this->page()->currentFrame()->setScrollBarPolicy(Qt::Vertical,Qt::ScrollBarAsNeeded);
+//no longer needed as of Qt5
+//this->page()->currentFrame()->setScrollBarPolicy(Qt::Vertical,Qt::ScrollBarAsNeeded);
 //this->page()->setLinkDelegationPolicy(QWebEnginePage::DelegateAllLinks);
 }
 
@@ -1651,6 +1656,8 @@ qWarning() << "using assetpath "+assetpath;
 
 
 // set font for chinese
+//removed. https://doc.qt.io/qt-5/sourcebreaks.html#changes-to-qtextcodec
+//but no remedy or what to replace it with...
 //QTextCodec::setCodecForTr(QTextCodec::codecForName("utf8"));
 //QTextCodec::setCodecForCStrings(QTextCodec::codecForLocale());
 QString fontpath=assetpath + "fonts/DroidSansFallbackFull.ttf";
@@ -1729,7 +1736,7 @@ eng->setup();
 //about tab
 QWidget *aboutw=new QWidget();
 QGridLayout *aboutGL = new QGridLayout();
-QWebView *aboutTB = new QWebView();
+QWebEngineView *aboutTB = new QWebEngineView();
 aboutTB->setHtml(about);
 aboutTB->setMinimumSize(780,400);
 aboutGL->addWidget(aboutTB,0,0,Qt::AlignCenter);

@@ -1,7 +1,7 @@
 #include <QObject> 
 #include <QLabel> 
 #include <QUrl>
-#include <QtWebKitWidgets/QWebView>
+#include <QWebEngineView>
 #include <QComboBox>
 #include <sqlitedb.h>
 #include <QGridLayout>
@@ -57,7 +57,7 @@ CREATE TABLE translation(id int primary key, char_id int, lang text, def text);
         QHash<QString, int> tbltrans;
         QGridLayout *glayout;
         //QTextBrowser *deftxt;
-        QWebView *deftxt;
+        QWebEngineView *deftxt;
 
 signals:
 	void loadDefSgn(int i);
@@ -72,7 +72,7 @@ public slots:
 
 
 //class clickTB : public QTextBrowser{
-class clickTB : public QWebView{
+class clickTB : public QWebEngineView{
 Q_OBJECT
 
 
