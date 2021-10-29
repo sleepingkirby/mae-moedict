@@ -12,12 +12,13 @@
 #include <QMouseEvent>
 #include <QFileInfo>
 #include <QLineEdit>
-#include <QWebFrame>
 #include <QKeyEvent>
 #include <QCheckBox>
 #include <QDir>
 #include <QGroupBox>
 #include <QDateTime>
+#include <QWebEnginePage>
+#include <QtWebKitWidgets/QWebFrame>
 #include "./main.h"
 
 //asset folder path
@@ -312,15 +313,14 @@ rtrn[0]="";
 	if(dict.isEmpty()){
 	return rtrn;
 	}
-
+QRandomGenerator qr = QRandomGenerator(QDateTime::currentDateTime().toTime_t());
 	if(dict=="personal"){
 		if(pListId.count()>0){
 		//get random word from personal dictionary
 		//find min and max from keys
 		int pListMax=pListId.count(); //min is 0
 		// generate random number between min and max
-		qsrand(QDateTime::currentDateTime().toTime_t());
-		int rndid=(qrand()%(pListMax));
+		int rndid=(qr.generate()%(pListMax));
 		rtrn.remove(0);
 		rtrn[pListId[rndid]]=pListChar[rndid];// word id -> word
 		}
@@ -328,10 +328,9 @@ rtrn[0]="";
 	return rtrn;
 	}
 	else if(dict=="all"){
-	qsrand(QDateTime::currentDateTime().toTime_t());
 	//assume min is 1, max is global charMax
 	// random between those two numbers
-	int rndid=(qrand()%(charMax))+1;
+	int rndid=(qr.generate()%(charMax))+1;
 	rtrn.remove(0);
 	rtrn[rndid]=getWord(rndid);
 	return rtrn;
@@ -490,7 +489,7 @@ CREATE TABLE translation(id int primary key, char_id int, lang text, def text);
 	tbltrans["char_id"]=1;
 	tbltrans["lang"]=2;
 	tbltrans["def"]=3;
-        glayout = new QGridLayout(this);
+  glayout = new QGridLayout(this);
         //deftxt = new QTextBrowser(this);
         deftxt = new QWebView(this);
 
@@ -814,7 +813,7 @@ clickTB::clickTB(QComboBox *cb1, QComboBox *cb2, QComboBox *cb3, QComboBox *cb4,
 
 this->setMinimumSize(740,320);
 this->page()->currentFrame()->setScrollBarPolicy(Qt::Vertical,Qt::ScrollBarAlwaysOn);
-this->page()->setLinkDelegationPolicy(QWebPage::DelegateAllLinks);
+//this->page()->setLinkDelegationPolicy(QWebEnginePage::DelegateAllLinks);
 	
 cbzy1=cb1;
 cbzy2=cb2;
@@ -828,7 +827,7 @@ clickTB::clickTB(QLineEdit *lineedit, loadLbl *ldlbl){
 
 this->setMinimumSize(740,300);
 this->page()->currentFrame()->setScrollBarPolicy(Qt::Vertical,Qt::ScrollBarAlwaysOn);
-this->page()->setLinkDelegationPolicy(QWebPage::DelegateAllLinks);
+//this->page()->setLinkDelegationPolicy(QWebEnginePage::DelegateAllLinks);
 
 llbl=ldlbl;
 qle=lineedit;	
@@ -842,7 +841,7 @@ clickTB::clickTB(int minw,int minh, int maxw, int maxh){
 this->setMinimumSize(minw,minh);
 this->setMaximumSize(maxw,maxh);
 this->page()->currentFrame()->setScrollBarPolicy(Qt::Vertical,Qt::ScrollBarAsNeeded);
-this->page()->setLinkDelegationPolicy(QWebPage::DelegateAllLinks);
+//this->page()->setLinkDelegationPolicy(QWebEnginePage::DelegateAllLinks);
 }
 
 
@@ -1652,8 +1651,8 @@ qWarning() << "using assetpath "+assetpath;
 
 
 // set font for chinese
-QTextCodec::setCodecForTr(QTextCodec::codecForName("utf8"));
-QTextCodec::setCodecForCStrings(QTextCodec::codecForLocale());
+//QTextCodec::setCodecForTr(QTextCodec::codecForName("utf8"));
+//QTextCodec::setCodecForCStrings(QTextCodec::codecForLocale());
 QString fontpath=assetpath + "fonts/DroidSansFallbackFull.ttf";
 int fontId = QFontDatabase::addApplicationFont(fontpath);//only font that can do zhuyin and characters
 

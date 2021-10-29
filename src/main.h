@@ -1,7 +1,7 @@
 #include <QObject> 
 #include <QLabel> 
 #include <QUrl>
-#include <QWebView>
+#include <QtWebKitWidgets/QWebView>
 #include <QComboBox>
 #include <sqlitedb.h>
 #include <QGridLayout>
