@@ -59,7 +59,6 @@ int charMax;
 //global defpage
 defpage *dp;
 
-
 void loadRad2Num(){
 QString sqlq="select char,id from radical order by id";
 
@@ -711,6 +710,7 @@ return "\n\t" + str;
 
 
 void defpage::sgnRun(QUrl url){
+qWarning() << "sgnRun(QUrl)";
 bool isInt=false;
 int charid=url.toString().toInt(&isInt, 10);
 	if(isInt){
@@ -803,12 +803,25 @@ zyg->addWidget(tbRes,2,0,1,4,Qt::AlignTop| Qt::AlignHCenter);
 QObject::connect(pbSubmit, SIGNAL(pressed()), ldlbl, SLOT(setLoad()));
 QObject::connect(pbSubmit, SIGNAL(released()), tbRes, SLOT(sgnRun()));
 //QObject::connect(tbRes, SIGNAL(clicked()), ldlbl, SLOT(setLoad()));
-QObject::connect(tbRes, SIGNAL(linkClicked(QUrl)), dp, SLOT(sgnRun(QUrl)));
+QObject::connect(tbRes->page, SIGNAL(linkClicked(QUrl)), dp, SLOT(sgnRun(QUrl)));
 //QObject::connect(tbRes, SIGNAL(linkClicked(QUrl)), ldlbl, SLOT(setClear(QUrl)));
 
 this->setLayout(zyg);
 }
 
+
+//replacing linkedClick() because, apparently putting a click signal on a class is waaaaay too simple
+//No, let's bundle it with a larger, slower class to make, away from all the other web signals </sarcasm>
+/*
+bool clickTBP::acceptNavigationRequest(const QUrl &url, NavigationType type, bool isMainFrame){
+qWarning() << "link clicked";
+    if (type == QWebEnginePage::NavigationTypeLinkClicked)
+    {
+        qDebug() << url;
+    }
+    return true;
+}
+*/
 
 clickTB::clickTB(QComboBox *cb1, QComboBox *cb2, QComboBox *cb3, QComboBox *cb4,loadLbl *ldlbl){
 //this->setOpenLinks(false);
@@ -823,6 +836,10 @@ cbzy2=cb2;
 cbzy3=cb3;
 cbzya=cb4;
 llbl=ldlbl;
+
+page = new clickTBP(this);
+this->setPage(page);
+page->setParent(this);
 }
 
 clickTB::clickTB(QLineEdit *lineedit, loadLbl *ldlbl){
@@ -852,7 +869,9 @@ this->setMaximumSize(maxw,maxh);
 
 
 void clickTB::sgnRun(){
-this->setHtml(db2Str(sqlStr()));
+//this->setHtml(db2Str(sqlStr()));
+qWarning() << "waiting on links";
+this->page->setHtml(db2Str(sqlStr()));
 llbl->setClear();
 }
 
@@ -941,7 +960,7 @@ QString top="";
 		else{
 		head="";
 		}
-	  rtrn+= head + "<a href=\"" + db->result.value(0).toString() + "\"><span>" + db->result.value(1).toString() + "</span></a> ";
+	  rtrn+= head + "<a href=\"id:" + db->result.value(0).toString() + "\"><span>" + db->result.value(1).toString() + "</span></a> ";
         db->next();
         }
 db->close();

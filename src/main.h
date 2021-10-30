@@ -2,6 +2,7 @@
 #include <QLabel> 
 #include <QUrl>
 #include <QWebEngineView>
+#include <QWebEnginePage>
 #include <QComboBox>
 #include <sqlitedb.h>
 #include <QGridLayout>
@@ -71,6 +72,27 @@ public slots:
 };
 
 
+class clickTBP : public QWebEnginePage{
+Q_OBJECT
+public:
+    clickTBP(QObject* parent = 0) : QWebEnginePage(parent){}
+
+    bool acceptNavigationRequest(const QUrl &url, QWebEnginePage::NavigationType type, bool){
+
+        if (type == QWebEnginePage::NavigationTypeLinkClicked){
+            qWarning() << "link clicked: "+url.toString();
+            emit linkClicked(url);
+            return false;
+        }
+        return true;
+    }
+
+signals:
+    void linkClicked(const QUrl&);
+
+};
+
+
 //class clickTB : public QTextBrowser{
 class clickTB : public QWebEngineView{
 Q_OBJECT
@@ -106,6 +128,7 @@ public:
 	
 	QLineEdit *qle;
 
+  QWebEnginePage *page;
 signals:
 	void clicked();
 
