@@ -80,7 +80,6 @@ public:
     bool acceptNavigationRequest(const QUrl &url, QWebEnginePage::NavigationType type, bool){
 
         if (type == QWebEnginePage::NavigationTypeLinkClicked){
-            qWarning() << "link clicked: "+url.toString();
             emit linkClicked(url);
             return false;
         }

@@ -252,7 +252,8 @@ QString oggnum=num.rightJustified(4,'0');
 QString oggpath=path + "voices/" + oggnum + ".ogg";
 QFileInfo check_file(oggpath);
 	if(check_file.exists() && check_file.isFile()){
-	ahtml="<audio controls><source src=\"file:" + oggpath + "\" type=\"audio/ogg\"></audio><br>cmdline: mplayer " + oggpath + "<br><br>"+testahtml;
+	//ahtml="<audio controls><source src=\"file:" + oggpath + "\" type=\"audio/ogg\"></audio><br>cmdline: mplayer " + oggpath + "<br><br>"+testahtml;
+	ahtml="<audio controls><source src=\"file:///home/sleepingkirby/Music/sound/New_Message.mp3\" type=\"audio/ogg\"></audio><br>cmdline: mplayer " + oggpath + "<br><br>"+testahtml;
 	qDebug() << "audio file found: " + oggpath + "\n" +ahtml;
 	}
 	else{
@@ -710,7 +711,6 @@ return "\n\t" + str;
 
 
 void defpage::sgnRun(QUrl url){
-qWarning() << "sgnRun(QUrl) scheme: "+url.scheme()+", url: "+url.url()+", fileName: "+url.fileName()+", path:"+url.path();
 bool isInt=false;
 //int charid=url.toString().toInt(&isInt, 10);
 int charid=url.fileName().toInt(&isInt, 10);
@@ -1471,6 +1471,7 @@ ldlbl->setText("");
 //rnd.append("<a class=\"rnd\" href=\"#\">"+lbls["rand"]+"</a>");
 //pList.append("list1");
 clickTB *rndChar = new clickTB(40,40,200,70);
+rndChar->page->setHtml("");
 
 clickTB *myList=new clickTB(40,40,370,470);
 myList->llbl=ldlbl;
