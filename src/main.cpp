@@ -710,10 +710,11 @@ return "\n\t" + str;
 
 
 void defpage::sgnRun(QUrl url){
-qWarning() << "sgnRun(QUrl)";
+qWarning() << "sgnRun(QUrl) scheme: "+url.scheme()+", url: "+url.url()+", fileName: "+url.fileName()+", path:"+url.path();
 bool isInt=false;
-int charid=url.toString().toInt(&isInt, 10);
-	if(isInt){
+//int charid=url.toString().toInt(&isInt, 10);
+int charid=url.fileName().toInt(&isInt, 10);
+	if(url.scheme() == "id" && isInt){
 	//emit loadDefSgn(charid); a fix to try to generate a searching dialog when a link is clicked that failed. as even chained signals don't get drawn/ran until all the actions are done.
 	this->setup(charid);
 	this->show();
@@ -852,6 +853,9 @@ this->setMinimumSize(740,300);
 
 llbl=ldlbl;
 qle=lineedit;	
+page = new clickTBP(this);
+this->setPage(page);
+page->setParent(this);
 }
 
 
@@ -864,13 +868,15 @@ this->setMaximumSize(maxw,maxh);
 //no longer needed as of Qt5
 //this->page()->currentFrame()->setScrollBarPolicy(Qt::Vertical,Qt::ScrollBarAsNeeded);
 //this->page()->setLinkDelegationPolicy(QWebEnginePage::DelegateAllLinks);
+page = new clickTBP(this);
+this->setPage(page);
+page->setParent(this);
 }
 
 
 
 void clickTB::sgnRun(){
 //this->setHtml(db2Str(sqlStr()));
-qWarning() << "waiting on links";
 this->page->setHtml(db2Str(sqlStr()));
 llbl->setClear();
 }
@@ -878,10 +884,10 @@ llbl->setClear();
 //signal to get and fill random word
 void clickTB::sgnRnd(){
 QHash<int,QString> word=rndWord(dict->itemData(dict->currentIndex()).toString());
-QString rtrn="<a href=\"" + QString::number(word.begin().key()) + "\"><span>" + word.begin().value() + "</span></a> ";
+QString rtrn="<a href=\"id:" + QString::number(word.begin().key()) + "\"><span>" + word.begin().value() + "</span></a> ";
 rtrn="<html><head><style>" + readCSS() + "</style></head><body>" + rtrn + "</body></html>";
 qle->setText(word.begin().value());
-this->setHtml(rtrn);
+this->page->setHtml(rtrn);
 }
 
 //add to pList AND database (run lrnTB::add2PList(QString word) and then reload this clickTB
@@ -929,7 +935,7 @@ int pMax=pListId.count();
 int i=0;
 
 	while(i<pMax){
-	rtrn+="<a href=\"" + QString::number(pListId[i]) + "\"><span>" + pListChar[i] + "</span></a> <a href=\"d:" + pListChar[i] + "\"><span>[Delete]</span></a><br>";
+	rtrn+="<a href=\"id:" + QString::number(pListId[i]) + "\"><span>" + pListChar[i] + "</span></a> <a href=\"d:" + pListChar[i] + "\"><span>[Delete]</span></a><br>";
 	i++;
 	}
 
@@ -1114,7 +1120,7 @@ QObject::connect(cblgeq, SIGNAL(currentIndexChanged(QString)), cbnum, SLOT(sgnHi
 QObject::connect(pbSubmit, SIGNAL(pressed()), ldlbl, SLOT(setLoad()));
 QObject::connect(pbSubmit, SIGNAL(released()), tbRes, SLOT(sgnRadRun()));
 //QObject::connect(tbRes, SIGNAL(clicked()), ldlbl, SLOT(setLoad()));
-QObject::connect(tbRes, SIGNAL(linkClicked(QUrl)), dp, SLOT(sgnRun(QUrl)));
+QObject::connect(tbRes->page, SIGNAL(linkClicked(QUrl)), dp, SLOT(sgnRun(QUrl)));
 //QObject::connect(tbRes, SIGNAL(linkClicked(QUrl)), ldlbl, SLOT(setClear(QUrl)));
 
 this->setLayout(radg);
@@ -1172,7 +1178,7 @@ QString top="";
 		else{
 		subhead="";
 		}
-	rtrn+= head + subhead + "<a href=\"" + db->result.value(0).toString() + "\"><span>" + db->result.value(1).toString() + "</span></a> ";
+	rtrn+= head + subhead + "<a href=\"id:" + db->result.value(0).toString() + "\"><span>" + db->result.value(1).toString() + "</span></a> ";
         db->next();
         }
 db->close();
@@ -1245,7 +1251,7 @@ db->query(sqlstr);
 QString rtrn="";
 QString head="";
         while(db->result.isValid()){
-	rtrn+= head + "<a href=\"" + db->result.value(0).toString() + "\" class=\"free\"><span>" + db->result.value(1).toString() + "</span></a> ";
+	rtrn+= head + "<a href=\"id:" + db->result.value(0).toString() + "\" class=\"free\"><span>" + db->result.value(1).toString() + "</span></a> ";
         db->next();
         }
 db->close();
@@ -1267,7 +1273,7 @@ db->query(sqlstr);
 QString rtrn="";
 QString head="";
         while(db->result.isValid()){
-	rtrn+= head + "<a href=\"" + db->result.value(0).toString() + "\" class=\"eng\"><span>[" + db->result.value(2).toString() + "] "+ db->result.value(1).toString() + "</span></a> ";
+	rtrn+= head + "<a href=\"id:" + db->result.value(0).toString() + "\" class=\"eng\"><span>[" + db->result.value(2).toString() + "] "+ db->result.value(1).toString() + "</span></a> ";
         db->next();
         }
 db->close();
@@ -1382,7 +1388,7 @@ zyg->addWidget(tbRes,2,0,1,4,Qt::AlignBottom);
 QObject::connect(pbSubmit, SIGNAL(pressed()), ldlbl, SLOT(setLoad()));
 QObject::connect(pbSubmit, SIGNAL(released()), tbRes, SLOT(sgnFreeRun()));
 //QObject::connect(tbRes, SIGNAL(clicked()), ldlbl, SLOT(setLoad()));
-QObject::connect(tbRes, SIGNAL(linkClicked(QUrl)), dp, SLOT(sgnRun(QUrl)));
+QObject::connect(tbRes->page, SIGNAL(linkClicked(QUrl)), dp, SLOT(sgnRun(QUrl)));
 
 this->setLayout(zyg);
 }
@@ -1432,7 +1438,7 @@ QObject::connect(pbSubmit, SIGNAL(pressed()), ldlbl, SLOT(setLoad()));
 QObject::connect(pbSubmit, SIGNAL(released()), tbRes, SLOT(sgnEngRun()));
 
 //QObject::connect(tbRes, SIGNAL(linkClicked(QUrl)), ldlbl, SLOT(setLoad(QUrl)));
-QObject::connect(tbRes, SIGNAL(linkClicked(QUrl)), dp, SLOT(sgnRun(QUrl)));
+QObject::connect(tbRes->page, SIGNAL(linkClicked(QUrl)), dp, SLOT(sgnRun(QUrl)));
 //QObject::connect(dp, SIGNAL(loadDefSgn(int)), dp, SLOT(sgnLoadDef(int)));
 //QObject::connect(tbRes, SIGNAL(linkClicked(QUrl)), ldlbl, SLOT(setClear(QUrl)));
 
@@ -1546,10 +1552,10 @@ rndChar->dict=wDB; //set rndChar's instance of QComboBox with this object's
 rndChar->qle=add2PersDictLE;
 myList->qle=add2PersDictLE;
 QObject::connect(rndSubmit, SIGNAL(pressed()), rndChar, SLOT(sgnRnd()));
-QObject::connect(rndChar, SIGNAL(linkClicked(QUrl)), dp, SLOT(sgnRun(QUrl)));
+QObject::connect(rndChar->page, SIGNAL(linkClicked(QUrl)), dp, SLOT(sgnRun(QUrl)));
 QObject::connect(add2PersDict, SIGNAL(pressed()), myList, SLOT(sgnAddPDict()));
-QObject::connect(myList, SIGNAL(linkClicked(QUrl)), dp, SLOT(sgnRun(QUrl)));
-QObject::connect(myList, SIGNAL(linkClicked(QUrl)), myList, SLOT(sgnDelPDict(QUrl)));
+QObject::connect(myList->page, SIGNAL(linkClicked(QUrl)), dp, SLOT(sgnRun(QUrl)));
+QObject::connect(myList->page, SIGNAL(linkClicked(QUrl)), myList, SLOT(sgnDelPDict(QUrl)));
 
 this->setLayout(mnGrd);
 }
