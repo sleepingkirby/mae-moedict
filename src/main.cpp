@@ -252,14 +252,14 @@ QString oggnum=num.rightJustified(4,'0');
 QString oggpath=path + "voices/" + oggnum + ".ogg";
 QFileInfo check_file(oggpath);
 	if(check_file.exists() && check_file.isFile()){
-	//ahtml="<audio controls><source src=\"file:" + oggpath + "\" type=\"audio/ogg\"></audio><br>cmdline: mplayer " + oggpath + "<br><br>"+testahtml;
-	ahtml="<audio controls><source src=\"file:///home/sleepingkirby/Music/sound/New_Message.mp3\" type=\"audio/ogg\"></audio><br>cmdline: mplayer " + oggpath + "<br><br>"+testahtml;
+	ahtml="<audio controls><source src=\"file:" + oggpath + "\" type=\"audio/ogg\"></audio><br>cmdline: mplayer " + oggpath + "<br><br>"+testahtml;
 	qDebug() << "audio file found: " + oggpath + "\n" +ahtml;
 	}
 	else{
 	ahtml="<br>";
 	qDebug() << "audio file NOT found: " + oggpath;
 	}
+
 return ahtml;
 }
 
@@ -621,7 +621,7 @@ void defpage::setup(int charid){
 	inTxt += sep2 + trans;
 
 	inTxt+="</body></html>";
-	deftxt->setHtml(inTxt);
+	deftxt->setHtml(inTxt,QUrl("file:"+assetpath+"voices/"));
 	glayout->addWidget(deftxt);
 	this->setLayout(glayout);
 }
